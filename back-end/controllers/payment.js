@@ -1,6 +1,6 @@
 import { Payment } from "../models/payement.js";
-import { Subscription } from "../models/Subscription.js";
-import { SubscriptionPlan } from "../models/SubscriptionPlan.js";
+import { SubscriptionPlan } from "../models/subscriptionPlan.js";
+import { Subscription } from "../models/subscription.js";
 import { User } from "../models/users.js";
 
 export async function createPaymentAndManageSubscription(req, res) {

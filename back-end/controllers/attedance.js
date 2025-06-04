@@ -1,7 +1,5 @@
 import { Request, Response } from "express";
 import { User } from "../models/User";
-import { Subscription } from "../models/Subscription";
-import { Attendance } from "../models/Attendance"; // optionnel
 
 export async function markAttendance(req) {
   try {

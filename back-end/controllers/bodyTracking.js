@@ -1,5 +1,5 @@
-import { BodyTracking } from "../models/bodyTracking";
-import { User } from "../models/users";
+import { BodyTracking } from "../models/bodyTracking.js";
+import { User } from "../models/users.js";
 
 export async function getBody(req, res) {
   try {

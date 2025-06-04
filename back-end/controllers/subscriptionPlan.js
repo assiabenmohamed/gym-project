@@ -1,4 +1,4 @@
-import { SubscriptionPlan } from "../models/SubscriptionPlan.js";
+import { SubscriptionPlan } from "../models/subscriptionPlan.js";
 
 export async function getPlan(req, res) {
   try {

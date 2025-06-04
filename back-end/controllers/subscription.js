@@ -1,5 +1,4 @@
-import { Subscription } from "../models/Subscription";
-
+import { Subscription } from "../models/subscription.js";
 export async function getAllSubscriptions(req, res) {
   try {
     const subscriptions = await Subscription.find()
