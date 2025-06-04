@@ -2,27 +2,9 @@
 import Image from "next/image";
 import React from "react";
 import { motion } from "framer-motion";
-import Gallary from "./Gallary";
-const offer = [
-  {
-    image: "/gallary/team1.png",
-    title: "Body building",
-    description:
-      "You’ll look at graphs and charts in Task One, how to approach the task.",
-  },
-  {
-    image: "/gallary/team2.png",
-    title: "Muscle Gain",
-    description:
-      "You’ll look at graphs and charts in Task One, how to approach the task",
-  },
-  {
-    image: "/gallary/team3.png",
-    title: "Weight Loss",
-    description:
-      "You’ll look at graphs and charts in Task One, how to approach the task",
-  },
-];
+import Gallary from "./Gallery";
+import Categorie from "./Categorie";
+
 function Hero() {
   return (
     <div className="w-screen">
@@ -188,29 +170,7 @@ function Hero() {
         <h1 className=" g-clip-text text-white font-bold font-Oswald text-[120px] uppercase styleh1 text-center ">
           What I Offer
         </h1>
-        <div className="bg-black py-10">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 xl:px-40 md:px-10">
-            {offer.map((item, index) => (
-              <div
-                key={index}
-                className="p-4 rounded-xl shadow-md text-center flex flex-col gap-4"
-              >
-                <Image
-                  src={item.image}
-                  alt={item.title}
-                  width={600}
-                  height={500}
-                  quality={100}
-                  className=" rounded-md mb-2"
-                />
-                <h2 className="text-3xl text-white font-bold font-Oswald ">
-                  {item.title}
-                </h2>
-                <p className="text-[16px] text-white">{item.description}</p>
-              </div>
-            ))}
-          </div>
-        </div>
+        <Categorie></Categorie>
         <Gallary></Gallary>
       </div>
     </div>

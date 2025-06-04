@@ -8,13 +8,13 @@ import { motion } from "framer-motion";
 
 // Tableau des liens de navigation
 const link = [
-  { name: "HOME", path: "/vitrine" },
-  { name: "ABOUT", path: "/Services" },
-  { name: "COURSES", path: "/Skills" },
-  { name: "GALLERY", path: "/Resume" },
-  { name: "BMICALCULATER", path: "/Contact" },
-  { name: "SERVICES", path: "/Education" },
-  { name: "OURTEAM", path: "/Contact" },
+  { name: "HOME", path: "/" },
+  { name: "ABOUT", path: "/About" },
+  { name: "GALLERY", path: "/Gallery" },
+  { name: "Health Calculators", path: "/CalorieBmi" },
+  { name: "SERVICES", path: "/Services" },
+  { name: "OURTEAM", path: "/Ourteam" },
+  { name: "CONTACT", path: "/Contact" },
 ];
 
 function Navbar() {
@@ -69,17 +69,18 @@ function Navbar() {
               initial: { color: "#ff1313" }, // text-blue-600
             }}
           >
-            {/* Barre de fond animée */}
-            <motion.div
-              className="absolute left-0 top-0 h-full w-full origin-left bg-[#ff1313a9]  "
-              initial={{ scaleX: 0 }}
-              variants={{
-                hover: { scaleX: 1, color: "white" },
-              }}
-              transition={{ duration: 0.5, ease: "easeInOut" }}
-            />
-            {/* Texte par-dessus */}
-            <span className="relative z-10">log in</span>
+            <Link href="/login">
+              <motion.div
+                className="absolute left-0 top-0 h-full w-full origin-left bg-[#ff1313a9]  "
+                initial={{ scaleX: 0 }}
+                variants={{
+                  hover: { scaleX: 1, color: "white" },
+                }}
+                transition={{ duration: 0.5, ease: "easeInOut" }}
+              />
+              {/* Texte par-dessus */}
+              <span className="relative z-10">log in</span>
+            </Link>{" "}
           </motion.button>
         </li>
       </ul>
