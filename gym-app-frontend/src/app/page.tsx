@@ -52,6 +52,7 @@ export default function Home() {
   };
   useEffect(() => {
     fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/me`, {
+            method: "GET",
       credentials: "include", // ✅ important
     })
       .then((res) => res.json())
