@@ -27,7 +27,8 @@ connectDB();
 
 const allowedOrigins = [
   "http://localhost:3000",
-  "https://gym-project-7if7erven-ben-mohameds-projects.vercel.app"
+  "https://gym-project-7if7erven-ben-mohameds-projects.vercel.app",
+  "https://gym-project-muvryfizy-ben-mohameds-projects.vercel.app", 
 ];
 
 app.use(cors({
