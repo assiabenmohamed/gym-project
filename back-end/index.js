@@ -24,12 +24,22 @@ connectDB();
 
 // middlewares
 // middlewares
-app.use(
-  cors({
-    credentials: true,
-    origin: "http://localhost:3000",
-  })
-);
+
+const allowedOrigins = [
+  "http://localhost:3000",
+  "https://gym-project-7if7erven-ben-mohameds-projects.vercel.app"
+];
+
+app.use(cors({
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  credentials: true
+}));
 app.use(helmet());
 app.use(express.json());
 app.use(express.static("public"));
