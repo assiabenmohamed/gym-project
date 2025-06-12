@@ -8,7 +8,7 @@ export default function ExerciseApp() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<any>(null);
 
-  // État pour le formulaire d'ajout d'exercice
+  // État pour le formulaire d'ajout d'exercicse
   const [showForm, setShowForm] = useState(false);
   const [newExercise, setNewExercise] = useState({
     name: "",
@@ -29,7 +29,7 @@ export default function ExerciseApp() {
       ? ["All", ...new Set(exercises.map((ex) => ex.equipment))]
       : ["All"];
 
-  // Charger les exercices depuis l'API
+  // Charger les exercises depuis l'API
   useEffect(() => {
     const fetchExercises = async () => {
       try {
@@ -40,7 +40,7 @@ export default function ExerciseApp() {
         );
 
         if (!response.ok) {
-          throw new Error("Erreur lors du chargement des exercices");
+          throw new Error("Erreur lors du chargement des exercises");
         }
 
         const data = await response.json();
@@ -48,7 +48,7 @@ export default function ExerciseApp() {
         setError(null);
       } catch (err) {
         setError(
-          "Impossible de charger les exercices. Utilisation des données de démonstration."
+          "Impossible de charger les exercises. Utilisation des données de démonstration."
         );
       } finally {
         setIsLoading(false);
@@ -58,7 +58,7 @@ export default function ExerciseApp() {
     fetchExercises();
   }, []);
 
-  // Filtrer les exercices en fonction des sélections
+  // Filtrer les exercises en fonction des sélections
   const filteredExercises = exercises.filter((exercise) => {
     return (
       (selectedCategory === "All" || exercise.category === selectedCategory) &&
@@ -90,12 +90,12 @@ export default function ExerciseApp() {
       });
 
       if (!response.ok) {
-        throw new Error("Erreur lors de l'ajout de l'exercice");
+        throw new Error("Erreur lors de l'ajout de l'exercise");
       }
 
       const addedExercise = await response.json();
 
-      // Ajouter le nouvel exercice à la liste
+      // Ajouter le nouvel exercise à la liste
       setExercises([...exercises, addedExercise]);
 
       // Réinitialiser le formulaire
@@ -109,7 +109,7 @@ export default function ExerciseApp() {
 
       setShowForm(false);
     } catch (err) {
-      alert("Erreur lors de l'ajout de l'exercice. Veuillez réessayer.");
+      alert("Erreur lors de l'ajout de l'exercise. Veuillez réessayer.");
       console.error(err);
     }
   };
@@ -128,7 +128,7 @@ export default function ExerciseApp() {
       }
 
       alert("Base de données initialisée avec succès!");
-      // Recharger les exercices
+      // Recharger les exercises
       window.location.reload();
     } catch (err) {
       alert("Erreur lors de l'initialisation de la base de données");
@@ -141,14 +141,14 @@ export default function ExerciseApp() {
       <div className="max-w-7xl mx-auto">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold">
-            Application d'Exercices de Fitness
+            Application d'Exercises de Fitness
           </h1>
           <div className="space-x-2">
             <button
               className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded"
               onClick={() => setShowForm(true)}
             >
-              Ajouter un exercice
+              Ajouter un exercise
             </button>
             <button
               className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
@@ -210,18 +210,18 @@ export default function ExerciseApp() {
           <div className="flex justify-center py-10">
             <div className="text-center">
               <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-              <p>Chargement des exercices...</p>
+              <p>Chargement des exercises...</p>
             </div>
           </div>
         ) : (
-          /* Grille d'exercices */
+          /* Grille d'exercises */
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredExercises.map((exercise) => (
               <div
                 key={exercise._id}
                 className="bg-white rounded-lg overflow-hidden shadow-md"
               >
-                {/* Image GIF de l'exercice */}
+                {/* Image GIF de l'exersice */}
                 <div className="h-64 bg-gray-200 flex items-center justify-center overflow-hidden">
                   <img
                     src={exercise.photourl || "/api/placeholder/400/300"}
@@ -253,17 +253,17 @@ export default function ExerciseApp() {
 
         {!isLoading && filteredExercises.length === 0 && (
           <div className="text-center py-8 text-gray-500">
-            Aucun exercice ne correspond aux filtres sélectionnés.
+            Aucun exercise ne correspond aux filtres sélectionnés.
           </div>
         )}
       </div>
 
-      {/* Modal pour ajouter un exercice */}
+      {/* Modal pour ajouter un exercise */}
       {showForm && (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-full max-w-lg">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-bold">Ajouter un nouvel exercice</h2>
+              <h2 className="text-xl font-bold">Ajouter un nouvel exercise</h2>
               <button
                 onClick={() => setShowForm(false)}
                 className="text-gray-500 hover:text-gray-700"
@@ -275,7 +275,7 @@ export default function ExerciseApp() {
             <form onSubmit={handleSubmit}>
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Nom de l'exercice:
+                  Nom de l'exercise:
                 </label>
                 <input
                   type="text"

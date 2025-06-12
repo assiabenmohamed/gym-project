@@ -1,6 +1,4 @@
 import mongoose from "mongoose";
-import { user } from "./users";
-import mongoose from "mongoose";
 
 const attendanceSchema = new mongoose.Schema(
   {

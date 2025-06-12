@@ -5,7 +5,7 @@ import { User } from "../models/users.js";
 
 // Create a new program
 
-export async function getsSession(req, res) {
+export async function getSession(req, res) {
   try {
     const sessions = await Session.find();
     res.json(sessions);
@@ -20,13 +20,12 @@ export async function getSessionByUser(req, res) {
   try {
     const { userId } = req.params; // L'ID du membre est dans les params URL
 
-    // Recherche des programmes liés à ce user, on peut aussi populate si besoin
     const session = await Session.find({ user: userId });
 
     res.json(session);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Error fetching programs by user" });
+    res.status(500).json({ message: "Error fetching sessions by user" });
   }
 }
 
@@ -48,23 +47,17 @@ export async function getSessionById(req, res) {
 }
 export async function createSession(req, res) {
   try {
-    const { user, trainer, strecture } = req.body;
+    const { user, program, date, categories } = req.body;
 
-    // Vérifier si l'utilisateur existe
+    // Vérifie si l'utilisateur existe
     const foundUser = await User.findById(user);
     if (!foundUser) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // Vérifier si le coach existe
-    const foundTrainer = await User.findById(trainer);
-    if (!foundTrainer) {
-      return res.status(404).json({ message: "Trainer not found" });
-    }
-
-    // Vérifier les exercices dans la strecture
-    for (const day of strecture) {
-      for (const exo of day.exercices) {
+    // Vérifie si chaque exercise existe
+    for (const category of categories) {
+      for (const exo of category.exercises) {
         const exists = await Exercise.findById(exo.name);
         if (!exists) {
           return res.status(404).json({
@@ -74,92 +67,83 @@ export async function createSession(req, res) {
       }
     }
 
-    // Créer le programme
-    const newProgram = new Program(req.body);
-    await newProgram.save();
+    // Crée une nouvelle session
+    const newSession = new Session({
+      program,
+      user,
+      date,
+      categories,
+    });
+
+    await newSession.save();
 
     res.status(201).json({
-      message: "Program created successfully",
-      program: newProgram,
-    });
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({
-      message: "Error in createProgram controller",
-    });
-  }
-}
-export async function updateProgram(req, res) {
-  try {
-    const { id } = req.params;
-    const { user, trainer, strecture } = req.body;
-
-    // Vérifier que user existe
-    const userExists = await User.exists({ _id: user });
-    if (!userExists) {
-      return res.status(400).json({ message: "User not found" });
-    }
-
-    // Vérifier que trainer existe
-    const trainerExists = await User.exists({ _id: trainer });
-    if (!trainerExists) {
-      return res.status(400).json({ message: "Trainer not found" });
-    }
-
-    // Vérifier que tous les exercices dans la strecture existent
-    if (Array.isArray(strecture)) {
-      for (const section of strecture) {
-        if (Array.isArray(section.exercices)) {
-          for (const exercice of section.exercices) {
-            const exerciseExists = await Exercise.exists({
-              _id: exercice.name,
-            });
-            if (!exerciseExists) {
-              return res.status(400).json({
-                message: `Exercise with id ${exercice.name} not found`,
-              });
-            }
-          }
-        }
-      }
-    }
-
-    // Mise à jour du programme si toutes les vérifications passent
-    const updatedProgram = await Program.findByIdAndUpdate(id, req.body, {
-      new: true,
-    });
-
-    if (!updatedProgram) {
-      return res.status(404).json({ message: "Program not found" });
-    }
-
-    res.json({
-      message: "Program updated successfully",
-      program: updatedProgram,
+      message: "Session created successfully",
+      session: newSession,
     });
   } catch (error) {
     console.error(error);
     res.status(500).json({
-      message: "Error in updateProgram controller",
+      message: "Error in createSession controller",
     });
   }
 }
-export async function deleteProgram(req, res) {
+export async function updateSession(req, res) {
   try {
     const { id } = req.params;
-    const deleted = await Program.findByIdAndDelete(id);
+    const { program, user, date, categories } = req.body;
+
+    // Vérifie l'existence de la session
+    const session = await Session.findById(id);
+    if (!session) {
+      return res.status(404).json({ message: "Session not found" });
+    }
+
+    // Vérifie si chaque exercise existe
+    for (const category of categories) {
+      for (const exo of category.exercises) {
+        const exists = await Exercise.findById(exo.name);
+        if (!exists) {
+          return res.status(404).json({
+            message: `Exercise not found: ${exo.name}`,
+          });
+        }
+      }
+    }
+
+    // Met à jour la session
+    session.program = program;
+    session.user = user;
+    session.date = date;
+    session.categories = categories;
+
+    await session.save();
+
+    res.status(200).json({
+      message: "Session updated successfully",
+      session,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error in updateSession controller" });
+  }
+}
+export async function deleteSession(req, res) {
+  try {
+    const { id } = req.params;
+    const deleted = await Session.findByIdAndDelete(id);
 
     if (!deleted) {
-      return res.status(404).json({ message: "Program not found" });
+      return res.status(404).json({ message: "Session not found" });
     }
 
     res.json({
-      message: "Program deleted successfully",
+      message: "Session deleted successfully",
     });
   } catch (error) {
     console.log(error);
     res.status(500).json({
-      message: "Error in deleteProgram controller",
+      message: "Error in deleteSession controller",
     });
   }
 }

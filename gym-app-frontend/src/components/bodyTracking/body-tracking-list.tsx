@@ -7,11 +7,12 @@ import BodyTrackingPDF from "./body-tracking-pdf";
 type BodyTrackingListProps = {
   formData: FormData;
   onChange: (field: keyof FormData, value: string) => void;
-  onSubmit: () => void;
+  onSubmit?: () => void;
   editingEntry?: any;
   handleEdit?: (entry: BodyTrackingEntry) => void;
   bodyTrackingData: BodyTrackingEntry[];
   handleDelete?: (id: string) => void;
+  role?: string;
 };
 
 export default function BodyTrackingList({
@@ -22,6 +23,7 @@ export default function BodyTrackingList({
   handleEdit,
   bodyTrackingData,
   handleDelete,
+  role,
 }: BodyTrackingListProps) {
   const handleOpenPdf = async () => {
     const doc = <BodyTrackingPDF bodyTrackingData={bodyTrackingData} />;
@@ -33,7 +35,7 @@ export default function BodyTrackingList({
   return (
     <div>
       <div className="bg-white rounded-xl shadow-sm border border-gray-200">
-        <div className="p-6 border-b border-gray-200 flex justify-between"> 
+        <div className="p-6 border-b border-gray-200 flex justify-between">
           <h3 className="text-xl font-semibold">Entry History</h3>
 
           <button
@@ -65,9 +67,11 @@ export default function BodyTrackingList({
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Note
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
-                </th>
+                {role !== "member" && (
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Actions
+                  </th>
+                )}
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
@@ -95,25 +99,27 @@ export default function BodyTrackingList({
                     <td className="px-6 py-4 text-sm text-gray-900 max-w-xs truncate">
                       {entry.note || "-"}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <BodyTrackingForm
-                        formData={formData}
-                        onChange={onChange}
-                        onSubmit={onSubmit}
-                        editingEntry={editingEntry}
-                        entry={entry}
-                        handleEdit={handleEdit}
-                        add={false}
-                      />
+                    {role != "member" && (
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        <BodyTrackingForm
+                          formData={formData}
+                          onChange={onChange}
+                          onSubmit={onSubmit}
+                          editingEntry={editingEntry}
+                          entry={entry}
+                          handleEdit={handleEdit}
+                          add={false}
+                        />
 
-                      <button
-                        onClick={() => handleDelete?.(entry.id)}
-                        className="text-red-600 hover:text-red-900 p-1 hover:bg-red-50 rounded transition-colors"
-                        title="Delete entry"
-                      >
-                        <Trash2 size={16} />
-                      </button>
-                    </td>
+                        <button
+                          onClick={() => handleDelete?.(entry.id)}
+                          className="text-red-600 hover:text-red-900 p-1 hover:bg-red-50 rounded transition-colors"
+                          title="Delete entry"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </td>
+                    )}
                   </tr>
                 ))
               ) : (

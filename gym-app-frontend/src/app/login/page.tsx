@@ -27,11 +27,12 @@ export default function LoginPage() {
           headers: {
             "Content-Type": "application/json",
           },
+          credentials: "include",
           body: JSON.stringify({
             email: emailRef.current.value,
             password: passwordRef.current.value,
           }),
-          credentials: "include",
+          
         }
       );
 

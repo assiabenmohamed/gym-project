@@ -1,43 +1,71 @@
 import { BodyTracking } from "../models/bodyTracking.js";
 import { User } from "../models/users.js";
 
+// 🔍 GET - Récupérer toutes les entrées de body tracking
 export async function getBody(req, res) {
   try {
     const body = await BodyTracking.find();
     res.json(body);
   } catch (error) {
-    console.log(error);
+    console.error(error);
     res.status(500).json({
-      message: "error in getPlan controller",
+      message: "Erreur lors de la récupération des données de suivi corporel",
     });
   }
 }
+export async function getBodyByUser(req, res) {
+  try {
+    const { userId } = req.params;
+
+    const bodyData = await BodyTracking.find({ user: userId });
+
+    res.json(bodyData);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      message: "Erreur dans getBodyByUser controller",
+    });
+  }
+}
+
+// ➕ POST - Créer une nouvelle entrée de body tracking
 export async function createBody(req, res) {
   try {
     const {
-      email,
+      userid,
       date,
       weight,
       fatMass,
       muscleMass,
-      bonMass,
+      boneMass,
       visceralFat,
       metabolicRate,
       metabolicAge,
       waterMass,
       note,
     } = req.body;
-    const user = await User.findOne({
-      email: email,
-    });
-    id = user._id;
-    const newBody = new Body({
-      id,
+
+    // 🔁 Vérifie si l'ID utilisateur est fourni
+    if (!userid) {
+      return res
+        .status(400)
+        .json({ message: "L'identifiant utilisateur est requis." });
+    }
+
+    // 🔍 Vérifie que l'utilisateur existe
+    const user = await User.findById(userid);
+    if (!user) {
+      return res.status(404).json({ message: "Utilisateur non trouvé." });
+    }
+
+    // ✅ Création de l'entrée
+    const newBody = new BodyTracking({
+      user: user._id, // lien avec l'utilisateur
       date,
       weight,
       fatMass,
       muscleMass,
-      bonMass,
+      boneMass,
       visceralFat,
       metabolicRate,
       metabolicAge,
@@ -45,30 +73,30 @@ export async function createBody(req, res) {
       note,
     });
 
-    newBody.save();
+    await newBody.save();
 
-    res.json({
-      message: "Body created successfully",
+    res.status(201).json({
+      message: "Body tracking créé avec succès.",
       body: newBody,
     });
   } catch (error) {
-    console.log(error);
+    console.error("❌ Erreur dans createBody:", error);
     res.status(500).json({
-      message: "error in createBody controller",
+      message: "Erreur dans le contrôleur createBody.",
     });
   }
 }
+
+// ✏️ PUT - Mettre à jour une entrée existante
 export async function updateBody(req, res) {
   try {
     const { id } = req.params;
     const {
-      firstname,
-      lastname,
       date,
       weight,
       fatMass,
       muscleMass,
-      bonMass,
+      boneMass,
       visceralFat,
       metabolicRate,
       metabolicAge,
@@ -76,44 +104,56 @@ export async function updateBody(req, res) {
       note,
     } = req.body;
 
-    await BodyTracking.findByIdAndUpdate(id, {
-      firstname,
-      lastname,
-      date,
-      weight,
-      fatMass,
-      muscleMass,
-      bonMass,
-      visceralFat,
-      metabolicRate,
-      metabolicAge,
-      waterMass,
-      note,
-    });
+    const updated = await BodyTracking.findByIdAndUpdate(
+      id,
+      {
+        date,
+        weight,
+        fatMass,
+        muscleMass,
+        boneMass,
+        visceralFat,
+        metabolicRate,
+        metabolicAge,
+        waterMass,
+        note,
+      },
+      { new: true } // retourne l'objet mis à jour
+    );
+
+    if (!updated) {
+      return res.status(404).json({ message: "Entrée non trouvée" });
+    }
 
     res.json({
-      message: "your data has been updated successfully",
+      message: "Données mises à jour avec succès",
+      body: updated,
     });
   } catch (error) {
-    console.log(error);
+    console.error(error);
     res.status(500).json({
-      message: "error in updateBody controller",
+      message: "Erreur dans le contrôleur updateBody",
     });
   }
 }
+
+// 🗑️ DELETE - Supprimer une entrée
 export async function deleteBody(req, res) {
   try {
     const { id } = req.params;
+    const result = await BodyTracking.findByIdAndDelete(id);
 
-    await BodyTracking.deleteOne({ _id: id });
+    if (!result) {
+      return res.status(404).json({ message: "Entrée non trouvée" });
+    }
 
     res.json({
-      message: "Product has been deleted",
+      message: "Entrée supprimée avec succès",
     });
   } catch (error) {
-    console.log(error);
+    console.error(error);
     res.status(500).json({
-      message: "error in deleteBody controller",
+      message: "Erreur dans le contrôleur deleteBody",
     });
   }
 }

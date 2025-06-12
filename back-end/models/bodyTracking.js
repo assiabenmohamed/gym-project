@@ -6,7 +6,7 @@ const bodyTrackingSchema = new mongoose.Schema(
     weight: { type: Number, required: true },
     fatMass: { type: Number },
     muscleMass: { type: Number },
-    bonMass: { type: Number },
+    boneMass: { type: Number },
     visceralFat: { type: Number },
     metabolicRate: { type: Number },
     metabolicAge: { type: Number },

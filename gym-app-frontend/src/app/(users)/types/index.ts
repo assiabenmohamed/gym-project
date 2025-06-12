@@ -3,6 +3,7 @@ export interface User {
   name: string;
   email: string;
   goal: "muscle_gain" | "fat_loss" | "maintenance";
+  trainerAssigned: string | null;
 }
 
 export interface BodyTrackingEntry {
@@ -60,5 +61,5 @@ export interface GoalInfo {
   color: string;
 }
 
-export type UserRole = "member" | "coach";
+export type UserRole = "member" | "trainer";
 export type ActiveTab = "overview" | "chart" | "history";

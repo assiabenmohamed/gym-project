@@ -1,15 +1,14 @@
-import { Request, Response } from "express";
-import { User } from "../models/User";
+import { User } from "../models/users.js";
+import { Subscription } from "../models/subscription.js";
+import { Attendance } from "../models/attendance.js";
 
-export async function markAttendance(req) {
+export async function markAttendance(req, res) {
   try {
     const { email } = req.body;
 
-    // 🔍 Trouver l'utilisateur
     const user = await User.findOne({ email });
     if (!user) return res.status(404).json({ error: "Utilisateur non trouvé" });
 
-    // ✅ Trouver son abonnement actif
     const subscription = await Subscription.findOne({
       user: user._id,
       isActive: true,
@@ -20,7 +19,6 @@ export async function markAttendance(req) {
       return res.status(400).json({ error: "Aucun abonnement actif trouvé" });
     }
 
-    // 🔒 Vérifier s’il reste des séances (si ce n’est pas illimité)
     if (
       subscription.remainingSessions !== null &&
       subscription.remainingSessions <= 0
@@ -28,14 +26,23 @@ export async function markAttendance(req) {
       return res.status(403).json({ error: "Plus de séances disponibles" });
     }
 
-    // 🗓️ Marquer la présence (optionnel)
-    await Attendance.create({
+    // Empêcher les doublons de présence le même jour
+    const alreadyMarked = await Attendance.findOne({
       user: user._id,
-      date: new Date(),
-      subscription: subscription._id,
+      date: {
+        $gte: new Date(new Date().setHours(0, 0, 0, 0)),
+        $lt: new Date(new Date().setHours(23, 59, 59, 999)),
+      },
     });
 
-    // ➖ Décrémenter les séances restantes si applicable
+    if (alreadyMarked) {
+      return res
+        .status(409)
+        .json({ message: "Présence déjà enregistrée aujourd'hui" });
+    }
+
+    await Attendance.create({ user: user._id });
+
     if (subscription.remainingSessions !== null) {
       subscription.remainingSessions -= 1;
       await subscription.save();

@@ -11,14 +11,14 @@ const programSchema = new mongoose.Schema(
     duration: { type: Number, default: 8 },
     isActive: { type: Boolean, default: true },
     objective: { type: String },
-    strecture: [
+    structure: [
       {
         name: { type: String },
-        exercices: [
+        exercises: [
           {
             name: {
               type: mongoose.Schema.Types.ObjectId,
-              ref: "Exercice",
+              ref: "Exercise",
               required: true,
             },
             sets: [{ repetition: Number }],

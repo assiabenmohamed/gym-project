@@ -11,6 +11,9 @@ import { exerciseRouter } from "./routes/exercise.js";
 import { programsRouter } from "./routes/program.js";
 import { subscriptionPlanRouter } from "./routes/subscriptionPlan.js";
 import { paymentRouter } from "./routes/payment.js";
+import { bodyTrackingRouter } from "./routes/bodyTracking.js";
+import { sessionRouter } from "./routes/session.js";
+import { attendanceRouter } from "./routes/attendance.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -34,10 +37,13 @@ app.use(cookieParser());
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 app.use("/users", usersRouter);
-app.use("/exercises", exerciseRouter); // Ajout de la route pour les exercices de l'API
+app.use("/exercises", exerciseRouter);
 app.use("/programs", programsRouter);
 app.use("/subscriptionPlan", subscriptionPlanRouter);
 app.use("/payment", paymentRouter);
+app.use("/bodyTracking", bodyTrackingRouter);
+app.use("/sessions", sessionRouter);
+app.use("/attendance", attendanceRouter);
 app.get("/ping", async (req, res) => {
   res.send("pong");
 });

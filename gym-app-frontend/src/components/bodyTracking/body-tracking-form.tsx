@@ -16,7 +16,7 @@ import { useState } from "react";
 type BodyTrackingFormProps = {
   formData: FormData;
   onChange: (field: keyof FormData, value: string) => void;
-  onSubmit: () => void;
+  onSubmit?: () => void;
   editingEntry?: any;
   entry?: BodyTrackingEntry;
   handleEdit?: (entry: BodyTrackingEntry) => void;
@@ -33,7 +33,7 @@ export function BodyTrackingForm({
 }: BodyTrackingFormProps) {
   const [open, setOpen] = useState(false);
   const handleSubmitAndClose = () => {
-    onSubmit();
+    onSubmit?.();
     setOpen(false);
   };
   return (

@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-const exerciceSchema = new mongoose.Schema(
+const exerciseSchema = new mongoose.Schema(
   {
     name: { type: String, required: true },
     category: { type: String, required: true },
@@ -9,4 +9,4 @@ const exerciceSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
-export const Exercise = mongoose.model("Exercise", exerciceSchema);
+export const Exercise = mongoose.model("Exercise", exerciseSchema);

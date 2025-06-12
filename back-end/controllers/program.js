@@ -6,10 +6,7 @@ import { User } from "../models/users.js";
 
 export async function getPrograms(req, res) {
   try {
-    const programs = await Program.find()
-      .populate("user", "firstName lastName")
-      .populate("trainer", "firstName lastName")
-      .populate("strecture.exercices.name", "name category");
+    const programs = await Program.find();
 
     res.json(programs);
   } catch (error) {
@@ -19,14 +16,13 @@ export async function getPrograms(req, res) {
     });
   }
 }
+
 export async function getProgramsByUser(req, res) {
   try {
     const { userId } = req.params; // L'ID du membre est dans les params URL
 
     // Recherche des programmes liés à ce user, on peut aussi populate si besoin
-    const programs = await Program.find({ user: userId })
-      .populate("trainer", "firstName lastName email") // optionnel, pour infos coach
-      .populate("strecture.exercices.name", "name category"); // populate exercices dans la structure
+    const programs = await Program.find({ user: userId });
 
     res.json(programs);
   } catch (error) {
@@ -38,9 +34,7 @@ export async function getProgramsByTrainer(req, res) {
   try {
     const { trainerId } = req.params;
 
-    const programs = await Program.find({ trainer: trainerId })
-      .populate("user", "firstName lastName email") // Infos utilisateur
-      .populate("strecture.exercices.name", "name category"); // Exercices détails
+    const programs = await Program.find({ trainer: trainerId });
 
     res.json(programs);
   } catch (error) {
@@ -52,10 +46,7 @@ export async function getProgramById(req, res) {
   try {
     const { id } = req.params;
 
-    const program = await Program.findById(id)
-      .populate("user", "firstName lastName email")
-      .populate("trainer", "firstName lastName email")
-      .populate("strecture.exercices.name", "name category");
+    const program = await Program.findById(id);
 
     if (!program) {
       return res.status(404).json({ message: "Program not found" });
@@ -69,23 +60,23 @@ export async function getProgramById(req, res) {
 }
 export async function createProgram(req, res) {
   try {
-    const { user, trainer, strecture } = req.body;
+    const { user, trainer, name, duration, objective, structure } = req.body;
 
-    // Vérifier si l'utilisateur existe
+    // 🔍 Vérifier si l'utilisateur existe
     const foundUser = await User.findById(user);
     if (!foundUser) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // Vérifier si le coach existe
+    // 🔍 Vérifier si le coach existe
     const foundTrainer = await User.findById(trainer);
     if (!foundTrainer) {
       return res.status(404).json({ message: "Trainer not found" });
     }
 
-    // Vérifier les exercices dans la strecture
-    for (const day of strecture) {
-      for (const exo of day.exercices) {
+    // 🔍 Vérifier tous les exercises de la structure
+    for (const day of structure) {
+      for (const exo of day.exercises) {
         const exists = await Exercise.findById(exo.name);
         if (!exists) {
           return res.status(404).json({
@@ -95,8 +86,22 @@ export async function createProgram(req, res) {
       }
     }
 
-    // Créer le programme
-    const newProgram = new Program(req.body);
+    //  Désactiver les anciens programmes actifs de l'utilisateur
+    await Program.updateMany(
+      { user, isActive: true },
+      { $set: { isActive: false } }
+    );
+    // ✅ Créer le nouveau programme
+    const newProgram = new Program({
+      user,
+      trainer,
+      name,
+      duration,
+      isActive: true,
+      objective,
+      structure,
+    });
+
     await newProgram.save();
 
     res.status(201).json({
@@ -104,51 +109,52 @@ export async function createProgram(req, res) {
       program: newProgram,
     });
   } catch (error) {
-    console.log(error);
-    res.status(500).json({
-      message: "Error in createProgram controller",
-    });
+    console.error(error);
+    res.status(500).json({ message: "Error in createProgram controller" });
   }
 }
 export async function updateProgram(req, res) {
   try {
     const { id } = req.params;
-    const { user, trainer, strecture } = req.body;
+    const { user, trainer, name, duration, objective, structure } = req.body;
 
-    // Vérifier que user existe
-    const userExists = await User.exists({ _id: user });
-    if (!userExists) {
-      return res.status(400).json({ message: "User not found" });
+    // 🔍 Vérifier si l'utilisateur existe
+    const foundUser = await User.findById(user);
+    if (!foundUser) {
+      return res.status(404).json({ message: "User not found" });
     }
 
-    // Vérifier que trainer existe
-    const trainerExists = await User.exists({ _id: trainer });
-    if (!trainerExists) {
-      return res.status(400).json({ message: "Trainer not found" });
+    // 🔍 Vérifier si le coach existe
+    const foundTrainer = await User.findById(trainer);
+    if (!foundTrainer) {
+      return res.status(404).json({ message: "Trainer not found" });
     }
 
-    // Vérifier que tous les exercices dans la strecture existent
-    if (Array.isArray(strecture)) {
-      for (const section of strecture) {
-        if (Array.isArray(section.exercices)) {
-          for (const exercice of section.exercices) {
-            const exerciseExists = await Exercise.exists({
-              _id: exercice.name,
-            });
-            if (!exerciseExists) {
-              return res.status(400).json({
-                message: `Exercise with id ${exercice.name} not found`,
-              });
-            }
-          }
+    // 🔍 Vérifier tous les exercises de la structure
+    for (const day of structure) {
+      for (const exo of day.exercises) {
+        const exists = await Exercise.findById(exo.name);
+        if (!exists) {
+          return res.status(404).json({
+            message: `Exercise not found: ${exo.name}`,
+          });
         }
       }
     }
 
-    // Mise à jour du programme si toutes les vérifications passent
-    const updatedProgram = await Program.findByIdAndUpdate(id, req.body, {
-      new: true,
-    });
+    // ✅ Mettre à jour le programme
+    const updatedProgram = await Program.findByIdAndUpdate(
+      id,
+      {
+        user,
+        trainer,
+        name,
+        duration,
+        objective,
+        structure,
+      },
+      { new: true }
+    );
 
     if (!updatedProgram) {
       return res.status(404).json({ message: "Program not found" });
