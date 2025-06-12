@@ -62,7 +62,7 @@ export async function register(req, res) {
     res.status(201).json({ user: userResponse });
   } catch (error) {
     console.log(error);
-    res.json({ message: "error in register controller" });
+  res.status(500).json({ message: "error in register controller", error: error.message });
   }
 }
 
