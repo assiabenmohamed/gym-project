@@ -103,7 +103,6 @@ res.cookie("token", token, {
   sameSite: isProduction ? "None" : "Lax", // ❗ None pour accepter cross-site en prod
 });
     userExists.isOnline = true;
-res.cookie("token", token, options);
     res.json({
       user: userExists,
     });
@@ -257,6 +256,7 @@ export async function logout(req, res) {
     const userId = decoded.id;
 
     await User.findByIdAndUpdate(userId, { isOnline: false });
+const isProduction = process.env.NODE_ENV === "production";
 
 res.clearCookie("token", {
   httpOnly: true,
