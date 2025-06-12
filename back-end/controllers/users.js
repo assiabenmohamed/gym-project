@@ -94,12 +94,14 @@ export async function login(req, res) {
     const payload = { userId: userExists._id, email: userExists.email };
     const token = jwt.sign(payload, JWT_SECRET, { expiresIn: "14d" }); // Le token expire après 14 jours
 
- const options = {
-  maxAge: MILILSECONDS_IN_A_DAY * 14,
+const isProduction = process.env.NODE_ENV === "production";
+
+res.cookie("token", token, {
+  maxAge: 1000 * 60 * 60 * 24 * 14, // 14 jours
   httpOnly: true,
-  secure: true,         // Toujours true en production
-  sameSite: "None",     // ⚠️ Obligatoire pour les requêtes cross-origin avec cookie
-};
+  secure: isProduction,          // ❗ false en local, true en prod
+  sameSite: isProduction ? "None" : "Lax", // ❗ None pour accepter cross-site en prod
+});
     userExists.isOnline = true;
 res.cookie("token", token, options);
     res.json({
@@ -258,8 +260,8 @@ export async function logout(req, res) {
 
 res.clearCookie("token", {
   httpOnly: true,
-  secure: true,
-  sameSite: "None",
+  secure: isProduction,
+  sameSite: isProduction ? "None" : "Lax",
 });
 
     res.status(200).json({ message: "Logged out" });
