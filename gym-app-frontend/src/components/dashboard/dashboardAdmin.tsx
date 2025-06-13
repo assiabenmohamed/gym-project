@@ -50,6 +50,7 @@ export default function DashboardAdmin({
         const response = await fetch(
           `${process.env.NEXT_PUBLIC_API_URL}/users/members`,
           {
+            method: "GET",
             credentials: "include",
           }
         );
@@ -97,6 +98,7 @@ export default function DashboardAdmin({
         const response = await fetch(
           `${process.env.NEXT_PUBLIC_API_URL}/users/trainers`,
           {
+            method: "GET",
             credentials: "include",
           }
         );
@@ -133,6 +135,7 @@ export default function DashboardAdmin({
         const response = await fetch(
           `${process.env.NEXT_PUBLIC_API_URL}/payment`,
           {
+            method: "GET",
             credentials: "include",
           }
         );
