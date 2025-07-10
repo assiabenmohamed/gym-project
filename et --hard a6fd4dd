@@ -1,0 +1,15 @@
+[33m59916e8[m[33m ([m[1;36mHEAD[m[33m)[m HEAD@{0}: pull --rebase origin master (start): checkout 59916e8517c1f80db8d3eca4a319f544f5d0f3b3
+[33mb73cdb7[m[33m ([m[1;31morigin/master[m[33m, [m[1;32mmaster[m[33m)[m HEAD@{1}: commit: gym v7
+[33ma6fd4dd[m HEAD@{2}: commit: gym v6
+[33m2bdf960[m HEAD@{3}: commit: gym v5
+[33mbb21483[m HEAD@{4}: commit: bcryptjs
+[33m59f6f7d[m HEAD@{5}: commit: change pack
+[33mb9d23ef[m HEAD@{6}: commit: add sub
+[33m19a8896[m HEAD@{7}: commit: gym v4
+[33ma8a87dd[m HEAD@{8}: commit: fix project v3
+[33mfe57b43[m HEAD@{9}: commit: fix project v2
+[33m45a4df6[m HEAD@{10}: commit: fix project
+[33m615fb67[m HEAD@{11}: commit: add vetrine v2
+[33mece2fbc[m HEAD@{12}: commit: add vetrine
+[33ma2484ab[m HEAD@{13}: commit: add front and back
+[33m021bb52[m HEAD@{14}: commit (initial): gymappv0
