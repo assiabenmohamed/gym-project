@@ -63,6 +63,10 @@ export default function AttendanceTracker({ members }: { members: User[] }) {
 
     const member = members.find((m) => m._id === selectedMemberId);
     if (!member || !member.email) return;
+    const isConfirmed = window.confirm(
+      `Are you sure you want to mark ${member.firstName} ${member.lastName} as present?`
+    );
+    if (!isConfirmed) return; // L'utilisateur a annulé
 
     try {
       const res = await fetch(
@@ -98,15 +102,15 @@ export default function AttendanceTracker({ members }: { members: User[] }) {
   };
 
   return (
-    <div className="w-full max-w-4xl mx-auto space-y-6 ">
+    <div className="xl:w-[50vw] max-w-4xl mx-auto space-y-6 ">
       <Card>
         <CardHeader className="text-center">
-          <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
-            <UserCheck className="h-6 w-6 text-primary" />
+          <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-primary/2">
+            <UserCheck className="h-6 w-6  text-accent" />
           </div>
-          <CardTitle>Gym Attendance Tracker</CardTitle>
+          <CardTitle className="">Gym Attendance Tracker</CardTitle>
           <CardDescription className="flex items-center justify-center gap-2">
-            <Calendar className="h-4 w-4" />
+            <Calendar className="h-4 w-4 text-accent" />
             <span>{currentDate}</span>
           </CardDescription>
         </CardHeader>
@@ -120,7 +124,7 @@ export default function AttendanceTracker({ members }: { members: User[] }) {
               <Input
                 id="search"
                 placeholder="Type member name..."
-                className="pl-8"
+                className="pl-8   !border !border-gray-300 focus:!outline-none focus:!ring-0 focus:!border-accent"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
@@ -135,7 +139,10 @@ export default function AttendanceTracker({ members }: { members: User[] }) {
               value={selectedMemberId}
               onValueChange={setSelectedMemberId}
             >
-              <SelectTrigger id="member-select">
+              <SelectTrigger
+                id="member-select"
+                className="focus:!border-accent focus:!outline-none focus:!ring-0"
+              >
                 <SelectValue placeholder="Choose a member..." />
               </SelectTrigger>
               <SelectContent>
@@ -143,7 +150,7 @@ export default function AttendanceTracker({ members }: { members: User[] }) {
                   <SelectItem
                     key={member._id}
                     value={member._id}
-                    className="focus:bg-blue-600  "
+                    className="focus:bg-accent focus:text-white"
                   >
                     {member.lastName}, {member.firstName}
                   </SelectItem>
@@ -155,9 +162,9 @@ export default function AttendanceTracker({ members }: { members: User[] }) {
           <Button
             onClick={markPresent}
             disabled={!selectedMemberId}
-            className="w-full"
+            className="w-full bg-accent hover:bg-accent/90"
           >
-            <UserCheck className="mr-2 h-4 w-4" />
+            <UserCheck className="mr-2 h-4 w-4 " />
             Mark Present
           </Button>
         </CardContent>

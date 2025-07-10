@@ -14,7 +14,7 @@ export async function getSubscriptionByUserId(req, res) {
   try {
     const { userId } = req.params;
 
-    const subscription = await Subscription.findOne({ user: userId }).populate(
+    const subscription = await Subscription.find({ user: userId }).populate(
       "plan"
     );
     if (!subscription) {

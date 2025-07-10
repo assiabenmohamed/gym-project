@@ -27,12 +27,16 @@ import Image from "next/image";
 import Link from "next/link";
 import DashboardAdmin from "@/components/dashboard/dashboardAdmin";
 import DashboardTrainer from "@/components/dashboard/dashboardTrainer";
-import DashboardMember from "@/components/dashboard/dashboardMember";
+import { DashboardMember } from "@/components/dashboard/dashboardMember";
+import { io, Socket } from "socket.io-client";
+
 export type User = {
+  _id: string;
   firstName: string;
   lastName: string;
   email: string;
   role: "admin" | "trainer" | "member";
+  createdAt: string;
   avatarUrl?: string; // URL de la photo (optionnelle)
 };
 
@@ -51,28 +55,80 @@ export default function Home() {
     });
   };
   useEffect(() => {
+    let socket: Socket | null = null;
+    let isMounted = true;
+
+    const initializeSocket = (userId: string) => {
+      socket = io(process.env.NEXT_PUBLIC_API_URL || "", {
+        withCredentials: true,
+      });
+
+      socket.on("connect", () => {
+        console.log("✅ Socket connecté :", socket?.id);
+        socket?.emit("user_connected", userId);
+      });
+
+      socket.on("disconnect", () => {
+        console.log("❌ Socket déconnecté");
+      });
+
+      socket.on("connect_error", (error) => {
+        console.error("❌ Erreur de connexion socket :", error);
+      });
+
+      socket.on("connection_error", (data) => {
+        console.error("❌ Erreur de connexion utilisateur :", data.message);
+      });
+
+      // Écouter les mises à jour de statut en ligne
+      socket.on("update_online_status", (data) => {
+        console.log(
+          `👤 Statut mis à jour pour ${data.userId}: ${data.isOnline ? "en ligne" : "hors ligne"}`
+        );
+        // Ici vous pouvez mettre à jour l'état local des utilisateurs en ligne
+      });
+    };
+
     fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/me`, {
-      credentials: "include", // ✅ important
+      credentials: "include",
     })
       .then((res) => res.json())
       .then((data) => {
-        if (data && data._id) {
+        if (isMounted && data && data._id) {
           setIsLoggedIn(true);
-          // Extraire uniquement les informations nécessaires
           const userData: User = {
+            _id: data._id,
             firstName: data.firstName,
             lastName: data.lastName,
             email: data.email,
             role: data.role,
-            avatarUrl: data.profileImageUrl || "", // Prendre avatarUrl s'il existe
+            createdAt: data.createdAt,
+            avatarUrl: data.profileImageUrl || "",
           };
           setUser(userData);
+
+          // Initialiser la socket après avoir récupéré les données utilisateur
+          initializeSocket(data._id);
         } else {
           setIsLoggedIn(false);
         }
       })
-      .catch(() => setIsLoggedIn(false))
-      .finally(() => setIsLoading(false)); // ← Met fin au chargement
+      .catch((error) => {
+        console.error(
+          "❌ Erreur lors de la récupération des données utilisateur :",
+          error
+        );
+        setIsLoggedIn(false);
+      })
+      .finally(() => setIsLoading(false));
+
+    return () => {
+      isMounted = false;
+      if (socket) {
+        socket.disconnect();
+        console.log("🔌 Socket déconnectée");
+      }
+    };
   }, []);
   if (isLoading)
     return (
@@ -105,22 +161,28 @@ export default function Home() {
                             src={`${process.env.NEXT_PUBLIC_API_URL}/${user.avatarUrl}`}
                             alt="avatar"
                             fill
+                            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 200px"
                             className="object-cover"
                           />
                         </button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent>
-                        <DropdownMenuItem>
-                          <Link href="/profile">Profile</Link>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem asChild>
+                          <Link
+                            href="/profile"
+                            className="w-full px-4 py-2 rounded-md text-left cursor-pointer hover:bg-accent hover:!text-white transition-colors"
+                          >
+                            Profile
+                          </Link>
                         </DropdownMenuItem>
-                        <DropdownMenuItem>
+                        <DropdownMenuItem asChild>
                           <button
                             onClick={handleLogout}
-                            className="flex gap-2 items-center"
+                            className="flex gap-2 items-center w-full cursor-pointer hover:bg-accent hover:!text-white "
                           >
                             <IoIosLogOut className="text-lg" />
                             <span>Log out</span>
-                          </button>{" "}
+                          </button>
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
@@ -128,12 +190,12 @@ export default function Home() {
                 </header>{" "}
                 {user.role === "admin" ? (
                   <div>
-                    <DashboardAdmin /> hello
+                    <DashboardAdmin />
                   </div>
                 ) : user.role === "trainer" ? (
-                  <DashboardTrainer />
+                  <DashboardTrainer userme={user} />
                 ) : (
-                  <DashboardMember />
+                  <DashboardMember user={user} />
                 )}
               </SidebarInset>
             </SidebarProvider>

@@ -14,6 +14,10 @@ import { paymentRouter } from "./routes/payment.js";
 import { bodyTrackingRouter } from "./routes/bodyTracking.js";
 import { sessionRouter } from "./routes/session.js";
 import { attendanceRouter } from "./routes/attendance.js";
+import { subscriptionRouter } from "./routes/subscription.js";
+import { Server } from "socket.io";
+import { setupSocketHandlers } from "./controllers/socketController.js";
+import http from "http";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -37,6 +41,18 @@ app.use(cookieParser());
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 app.use("/users", usersRouter);
+const server = http.createServer(app);
+
+// Initialisation de Socket.IO
+const io = new Server(server, {
+  cors: {
+    origin: "http://localhost:3000",
+    credentials: true,
+  },
+});
+
+setupSocketHandlers(io);
+
 app.use("/exercises", exerciseRouter);
 app.use("/programs", programsRouter);
 app.use("/subscriptionPlan", subscriptionPlanRouter);
@@ -44,10 +60,14 @@ app.use("/payment", paymentRouter);
 app.use("/bodyTracking", bodyTrackingRouter);
 app.use("/sessions", sessionRouter);
 app.use("/attendance", attendanceRouter);
+app.use("/subscription", subscriptionRouter);
 app.get("/ping", async (req, res) => {
   res.send("pong");
 });
 
-app.listen(process.env.PORT, () => {
-  console.log("Server is running on port", process.env.PORT);
+server.listen(process.env.PORT, () => {
+  console.log(
+    "✅ Serveur HTTP + WebSocket en écoute sur le port",
+    process.env.PORT
+  );
 });

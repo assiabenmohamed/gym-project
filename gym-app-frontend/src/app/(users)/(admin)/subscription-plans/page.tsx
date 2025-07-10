@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { Plus, Edit, Trash2, Save, X } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 // Type definitions matching your MongoDB schema
 type Duration = "month" | "3 months" | "6 months" | "year";
@@ -144,26 +145,6 @@ export default function SubscriptionPlans() {
     });
   };
 
-  // const handleUpdate = (): void => {
-  //   if (isFormValid() && editingId) {
-  //     setPlans((prev) =>
-  //       prev.map((plan) =>
-  //         plan._id === editingId
-  //           ? {
-  //               ...plan,
-  //               duration: formData.duration as Duration,
-  //               frequency: formData.frequency as Frequency,
-  //               accessType: formData.accessType as AccessType,
-  //               price: parseFloat(formData.price.toString()),
-  //               updatedAt: new Date().toISOString(),
-  //             }
-  //           : plan
-  //       )
-  //     );
-  //     resetForm();
-  //     setEditingId(null);
-  //   }
-  // };
   const handleUpdate = async (id: string) => {
     const payload = {
       duration: formData.duration,
@@ -259,19 +240,19 @@ export default function SubscriptionPlans() {
           <h1 className="text-3xl font-bold text-gray-800">
             Subscription Plans
           </h1>
-          <button
+          <Button
             onClick={() => setIsCreating(true)}
-            className=" px-4 py-2 rounded-lg border border-input text-sm font-medium text-muted-foreground hover:bg-accent hover:text-white transition-colors flex items-center gap-2"
-            type="button"
+            variant="outline"
+            className=" hover:text-white shadow-md flex items-center gap-2 text-accent"
           >
             <Plus size={20} />
             New Plan
-          </button>
+          </Button>
         </div>
 
         {/* Create/Edit Form */}
         {(isCreating || editingId) && (
-          <div className="bg-gray-50 p-6 rounded-lg mb-6 border-2 border-blue-200">
+          <div className=" p-6 rounded-lg mb-6 border-[1px] border-accent ">
             <h2 className="text-xl font-semibold mb-4 text-gray-800">
               {isCreating ? "Create New Plan" : "Edit Plan"}
             </h2>
@@ -288,7 +269,7 @@ export default function SubscriptionPlans() {
                   name="duration"
                   value={formData.duration}
                   onChange={handleInputChange}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 "
+                  className="w-full p-3 border border-accent rounded-lg focus:ring-1 focus:ring-accent "
                   required
                 >
                   <option value="">Select duration</option>
@@ -311,7 +292,7 @@ export default function SubscriptionPlans() {
                   name="frequency"
                   value={formData.frequency}
                   onChange={handleInputChange}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 "
+                  className="w-full p-3 border border-accent rounded-lg focus:ring-1 focus:ring-accent"
                   required
                 >
                   <option value="">Select frequency</option>
@@ -334,7 +315,7 @@ export default function SubscriptionPlans() {
                   name="accessType"
                   value={formData.accessType}
                   onChange={handleInputChange}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 "
+                  className="w-full p-3 border border-accent rounded-lg focus:ring-1 focus:ring-accent "
                   required
                 >
                   <option value="">Select access type</option>
@@ -361,7 +342,7 @@ export default function SubscriptionPlans() {
                   step="0.01"
                   min="0"
                   placeholder="0.00"
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 "
+                  className="w-full p-3 border border-accent rounded-lg focus:ring-1 focus:ring-accent "
                   required
                 />
               </div>
@@ -374,7 +355,7 @@ export default function SubscriptionPlans() {
                     : () => editingId && handleUpdate(editingId)
                 }
                 disabled={!isFormValid()}
-                className="bg-green-600 hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
+                className="bg-accent/90 hover:bg-accent disabled:bg-gray-400 disabled:cursor-not-allowed text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
                 type="button"
               >
                 <Save size={16} />

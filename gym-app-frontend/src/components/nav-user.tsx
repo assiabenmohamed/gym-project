@@ -1,22 +1,7 @@
 "use client";
 
 import {
-  BadgeCheck,
-  Bell,
-  ChevronsUpDown,
-  CreditCard,
-  LogOut,
-  Sparkles,
-} from "lucide-react";
-
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
   DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
@@ -47,6 +32,7 @@ export function NavUser({ user }: NavbarLogProps) {
                   src={`${process.env.NEXT_PUBLIC_API_URL}/${user.avatarUrl}`}
                   alt="avatar"
                   fill
+                  sizes="(max-width: 768px) 32px, 64px"
                   className="object-cover"
                 />
               </div>

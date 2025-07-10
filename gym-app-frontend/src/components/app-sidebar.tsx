@@ -9,6 +9,7 @@ import {
   Activity,
   BadgeDollarSign,
   CalendarCheck,
+  LayoutDashboard,
 } from "lucide-react";
 import { FaClipboardList } from "react-icons/fa6";
 import { FaFileInvoiceDollar } from "react-icons/fa";
@@ -31,6 +32,7 @@ import { User } from "@/app/page";
 import Image from "next/image";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { IoIosLogOut } from "react-icons/io";
+import { title } from "process";
 
 type NavbarLogProps = {
   user: User; // Le prop 'user' doit être de type User
@@ -38,6 +40,11 @@ type NavbarLogProps = {
 // This is sample data.
 const data = {
   admin: [
+    {
+      title: "Dashboard",
+      url: "/",
+      icon: LayoutDashboard,
+    },
     {
       title: "Members",
       url: "/members",
@@ -61,6 +68,11 @@ const data = {
   ],
   trainer: [
     {
+      title: "Dashboard",
+      url: "/",
+      icon: LayoutDashboard,
+    },
+    {
       title: "Programs",
       url: "/programs",
       icon: FaClipboardList,
@@ -77,6 +89,11 @@ const data = {
     },
   ],
   member: [
+    {
+      title: "Dashboard",
+      url: "/",
+      icon: LayoutDashboard,
+    },
     {
       title: "My Sessions",
       url: "/sessions",
@@ -116,9 +133,11 @@ export function AppSidebar({ user, logoutAction, ...props }: AppSidebarProps) {
           <Image
             src="/logowhite.png"
             alt="Logo"
-            width={100}
-            height={100}
-          ></Image>
+            width={120}
+            height={80}
+            className="w-[100px] h-auto"
+            priority
+          />
         </div>
       </SidebarHeader>
       <SidebarContent>

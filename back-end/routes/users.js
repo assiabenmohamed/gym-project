@@ -5,12 +5,16 @@ import {
   deleteUser,
   getAllMembers,
   getAllTrainers,
+  getAllUsers,
   getUserById,
   getUserByIdFromCookies,
   login,
   logout,
   register,
+  resetPassword,
+  sendPasswordResetEmail,
   updateUser,
+  validateResetToken,
 } from "../controllers/users.js";
 import upload from "../middleware/upload.js";
 
@@ -24,6 +28,7 @@ router.post("/login", login);
 
 // Route pour récupérer un utilisateur par ID
 router.get("/me/:id", getUserById);
+router.get("/", getAllUsers);
 
 // Route pour récupérer un utilisateur à partir du cookie
 router.get("/me", getUserByIdFromCookies);
@@ -42,5 +47,7 @@ router.put("/:id", updateUser);
 
 // Route pour se déconnecter
 router.post("/logout", logout);
-
+router.post("/auth/send-reset-email", sendPasswordResetEmail);
+router.post("/auth/validate-reset-token", validateResetToken);
+router.post("/auth/reset-password", resetPassword);
 export { router as usersRouter };

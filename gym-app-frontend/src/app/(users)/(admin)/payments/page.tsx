@@ -14,6 +14,7 @@ import {
   Filter,
   Search,
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 // Type definitions matching your MongoDB schema
 type PaymentMethod = "card" | "cash";
@@ -21,7 +22,8 @@ type PaymentStatus = "paid" | "pending" | "failed";
 
 interface User {
   _id: string;
-  name: string;
+  firstName: string;
+  lastName: string;
   email: string;
 }
 
@@ -103,7 +105,7 @@ export default function PaymentManager() {
         // 👉 Debug : afficher les statuts HTTP
         console.log("usersRes:", usersRes.status);
         console.log("plansRes:", plansRes.status);
-        console.log("paymentsRes:", paymentsRes.status);
+        console.log("paymentsRes:", paymentsRes);
 
         if (!usersRes.ok || !plansRes.ok || !paymentsRes.ok) {
           throw new Error(
@@ -120,6 +122,7 @@ export default function PaymentManager() {
         setUsers(usersData);
         setSubscriptionPlans(plansData);
         setPayments(paymentsData);
+        console.log("paymentsData", paymentsData);
       } catch (error) {
         console.error("Erreur lors du chargement des données :", error);
       }
@@ -377,7 +380,10 @@ export default function PaymentManager() {
       filters.method === "all" || payment.method === filters.method;
     const matchesSearch =
       filters.searchTerm === "" ||
-      payment.user.name
+      payment.user.lastName
+        .toLowerCase()
+        .includes(filters.searchTerm.toLowerCase()) ||
+      payment.user.firstName
         .toLowerCase()
         .includes(filters.searchTerm.toLowerCase()) ||
       payment.user.email
@@ -412,9 +418,10 @@ export default function PaymentManager() {
   const paidAmount = filteredPayments
     .filter((p) => p.status === "paid")
     .reduce((sum, payment) => sum + payment.amount, 0);
+  console.log("filteredPayments", filteredPayments);
 
   return (
-    <div className="max-w-7xl mx-auto p-6 bg-gray-50 min-h-screen">
+    <div className="max-w-7xl mx-auto p-6  min-h-screen">
       <div className="bg-white rounded-lg shadow-lg p-6">
         <div className="flex justify-between items-center mb-6">
           <div>
@@ -427,18 +434,18 @@ export default function PaymentManager() {
               <span>Count: {filteredPayments.length}</span>
             </div>
           </div>
-          <button
+          <Button
             onClick={() => setIsCreating(true)}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
-            type="button"
+            variant="outline"
+            className=" hover:text-white shadow-md flex items-center gap-2 text-accent"
           >
             <Plus size={20} />
             New Payment
-          </button>
+          </Button>
         </div>
 
         {/* Filters */}
-        <div className="bg-gray-50 p-4 rounded-lg mb-6">
+        <div className=" p-4 rounded-lg mb-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -485,7 +492,7 @@ export default function PaymentManager() {
                 name="method"
                 value={filters.method}
                 onChange={handleFilterChange}
-                className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-accent"
               >
                 <option value="all">All Methods</option>
                 {paymentMethods.map((method) => (
@@ -503,7 +510,7 @@ export default function PaymentManager() {
                 name="dateRange"
                 value={filters.dateRange}
                 onChange={handleFilterChange}
-                className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-accent"
               >
                 <option value="all">All Time</option>
                 <option value="today">Today</option>
@@ -521,7 +528,7 @@ export default function PaymentManager() {
                     searchTerm: "",
                   })
                 }
-                className="w-full bg-gray-600 hover:bg-gray-700 text-white px-3 py-2 rounded-lg flex items-center justify-center gap-2 transition-colors"
+                className="w-full bg-accent/90 hover:bg-accent text-white px-3 py-2 rounded-lg flex items-center justify-center gap-2 transition-colors"
                 type="button"
               >
                 <Filter size={16} />
@@ -533,7 +540,7 @@ export default function PaymentManager() {
 
         {/* Create/Edit Form */}
         {(isCreating || editingId) && (
-          <div className="bg-gray-50 p-6 rounded-lg mb-6 border-2 border-blue-200">
+          <div className=" p-6 rounded-lg mb-6 border-[1px] border-accent">
             <h2 className="text-xl font-semibold mb-4 text-gray-800">
               {isCreating ? "Create New Payment" : "Edit Payment"}
             </h2>
@@ -556,7 +563,7 @@ export default function PaymentManager() {
                   <option value="">Select user</option>
                   {users.map((user) => (
                     <option key={user._id} value={user._id}>
-                      {user.name} ({user.email})
+                      {user.firstName} {user.lastName} ({user.email})
                     </option>
                   ))}
                 </select>
@@ -670,7 +677,7 @@ export default function PaymentManager() {
               <button
                 onClick={isCreating ? handleCreate : handleUpdate}
                 disabled={!isFormValid()}
-                className="bg-green-600 hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
+                className="bg-accent/90 hover:bg-accent disabled:bg-gray-400 disabled:cursor-not-allowed text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
                 type="button"
               >
                 <Save size={16} />
@@ -722,10 +729,10 @@ export default function PaymentManager() {
                   <td className="p-4">
                     <div>
                       <div className="font-medium text-gray-900">
-                        {payment.user.name}
+                        {payment.user?.lastName}, {payment.user?.firstName}
                       </div>
                       <div className="text-sm text-gray-500">
-                        {payment.user.email}
+                        {payment.user?.email}
                       </div>
                     </div>
                   </td>
@@ -772,7 +779,7 @@ export default function PaymentManager() {
                         onClick={() => handleEdit(payment)}
                         className="p-2 text-blue-600 hover:bg-blue-100 rounded-lg transition-colors"
                         type="button"
-                        aria-label={`Edit payment for ${payment.user.name}`}
+                        aria-label={`Edit payment for ${payment.user?.firstName}`}
                       >
                         <Edit size={16} />
                       </button>
@@ -780,7 +787,7 @@ export default function PaymentManager() {
                         onClick={() => handleDelete(payment._id)}
                         className="p-2 text-red-600 hover:bg-red-100 rounded-lg transition-colors"
                         type="button"
-                        aria-label={`Delete payment for ${payment.user.name}`}
+                        aria-label={`Delete payment for ${payment.user?.firstName}`}
                       >
                         <Trash2 size={16} />
                       </button>

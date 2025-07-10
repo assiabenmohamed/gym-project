@@ -38,6 +38,8 @@ const userSchema = new mongoose.Schema(
     medicalRestrictions: String,
     profileImageUrl: { type: String, default: "uploads/default-avatar.jpg" },
     isOnline: { type: Boolean, default: false },
+    resetToken: String,
+    resetTokenExpires: Date,
   },
 
   { timestamps: true }

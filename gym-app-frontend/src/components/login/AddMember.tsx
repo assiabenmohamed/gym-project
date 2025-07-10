@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { IoPersonAddOutline } from "react-icons/io5";
 
 import {
@@ -28,13 +29,16 @@ import {
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 import { Card } from "@/components/ui/card";
+import { toast } from "sonner";
 
 // Define the type for form data
 interface Trainer {
+  _id: string;
   firstName: string;
   lastName: string;
   email: string;
 }
+
 export interface FormData {
   firstName: string;
   lastName: string;
@@ -45,6 +49,11 @@ export interface FormData {
   gender: string;
   phoneNumber: string;
   trainerAssigned?: string;
+  emergencyContactName: string;
+  emergencyContactPhone: string;
+  emergencyContactRelation: string;
+  goals: string[];
+  medicalRestrictions: string;
 }
 
 // Define field type for form field mapping
@@ -57,7 +66,13 @@ interface FormField {
   placeholder?: string;
 }
 
-export function AddMember({ role }: { role: string }) {
+export function AddMember({
+  role,
+  onSuccess,
+}: {
+  role: string;
+  onSuccess?: () => void;
+}) {
   const [formData, setFormData] = useState<FormData>({
     firstName: "",
     lastName: "",
@@ -68,6 +83,11 @@ export function AddMember({ role }: { role: string }) {
     gender: "male",
     phoneNumber: "",
     trainerAssigned: "",
+    emergencyContactName: "",
+    emergencyContactPhone: "",
+    emergencyContactRelation: "",
+    goals: [],
+    medicalRestrictions: "",
   });
 
   const [fileName, setFileName] = useState<string>("No file chosen");
@@ -77,6 +97,7 @@ export function AddMember({ role }: { role: string }) {
     {}
   );
   const [trainers, setTrainers] = useState<Trainer[]>([]);
+  const [goalInput, setGoalInput] = useState<string>("");
 
   const [notification, setNotification] = useState<{
     message: string;
@@ -85,6 +106,7 @@ export function AddMember({ role }: { role: string }) {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const profileImageRef = useRef<File | null>(null);
   const [open, setOpen] = useState(false);
+
   useEffect(() => {
     console.log("Fetching trainers..."); // 👈 test
 
@@ -108,7 +130,9 @@ export function AddMember({ role }: { role: string }) {
     fetchTrainers();
   }, []);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
 
@@ -140,6 +164,23 @@ export function AddMember({ role }: { role: string }) {
     }
   };
 
+  const addGoal = () => {
+    if (goalInput.trim() && !formData.goals.includes(goalInput.trim())) {
+      setFormData({
+        ...formData,
+        goals: [...formData.goals, goalInput.trim()],
+      });
+      setGoalInput("");
+    }
+  };
+
+  const removeGoal = (goalToRemove: string) => {
+    setFormData({
+      ...formData,
+      goals: formData.goals.filter((goal) => goal !== goalToRemove),
+    });
+  };
+
   const validateForm = () => {
     const newErrors: Partial<Record<keyof FormData, string>> = {};
 
@@ -149,6 +190,10 @@ export function AddMember({ role }: { role: string }) {
     if (!formData.lastName.trim()) newErrors.lastName = "Last name is required";
     if (!formData.email.trim()) newErrors.email = "Email is required";
     if (!formData.password.trim()) newErrors.password = "Password is required";
+    if (!formData.birthday.trim()) newErrors.birthday = "Birthday is required";
+    if (!formData.address.trim()) newErrors.address = "Address is required";
+    if (!formData.phoneNumber.trim())
+      newErrors.phoneNumber = "Phone number is required";
 
     // Email validation
     if (formData.email && !/^\S+@\S+\.\S+$/.test(formData.email)) {
@@ -166,6 +211,29 @@ export function AddMember({ role }: { role: string }) {
       !/^[0-9+\-\s]{10,15}$/.test(formData.phoneNumber)
     ) {
       newErrors.phoneNumber = "Please enter a valid phone number";
+    }
+
+    // Emergency contact phone validation
+    if (
+      formData.emergencyContactPhone &&
+      !/^[0-9+\-\s]{10,15}$/.test(formData.emergencyContactPhone)
+    ) {
+      newErrors.emergencyContactPhone =
+        "Please enter a valid emergency contact phone";
+    }
+
+    // Birthday validation (must be in the past)
+    if (formData.birthday) {
+      const birthdayDate = new Date(formData.birthday);
+      const today = new Date();
+      if (birthdayDate >= today) {
+        newErrors.birthday = "Birthday must be in the past";
+      }
+    }
+
+    // Trainer assignment validation for members
+    if (role === "member" && !formData.trainerAssigned) {
+      newErrors.trainerAssigned = "Please assign a trainer";
     }
 
     setErrors(newErrors);
@@ -189,7 +257,20 @@ export function AddMember({ role }: { role: string }) {
 
       // Add text fields
       Object.entries(formData).forEach(([key, value]) => {
-        form.append(key, value);
+        if (key === "goals") {
+          form.append(key, JSON.stringify(value));
+        } else if (key.startsWith("emergencyContact")) {
+          // Handle emergency contact fields specially
+          const emergencyContactKey = key
+            .replace("emergencyContact", "")
+            .toLowerCase();
+          form.append(
+            `emergencyContact[${emergencyContactKey}]`,
+            value as string
+          );
+        } else {
+          form.append(key, value as string);
+        }
       });
 
       // Add image file if it exists
@@ -209,11 +290,10 @@ export function AddMember({ role }: { role: string }) {
       const result = await res.json();
 
       if (res.ok) {
-        setNotification({
-          message: "New member was added successfully",
-          type: "success",
+        toast.success("Succès", {
+          description: "The member was added successfully.",
         });
-
+        onSuccess?.();
         // Reset form
         setFormData({
           firstName: "",
@@ -224,9 +304,16 @@ export function AddMember({ role }: { role: string }) {
           address: "",
           gender: "male",
           phoneNumber: "",
+          trainerAssigned: "",
+          emergencyContactName: "",
+          emergencyContactPhone: "",
+          emergencyContactRelation: "",
+          goals: [],
+          medicalRestrictions: "",
         });
         setFileName("No file chosen");
         profileImageRef.current = null;
+        setGoalInput("");
 
         // Close dialog after a short delay to show success message
         setTimeout(() => {
@@ -235,7 +322,7 @@ export function AddMember({ role }: { role: string }) {
         }, 1500);
       } else {
         setNotification({
-          message: result.message || "Failed to add member",
+          message: result.message || `Failed to add ${role}`,
           type: "error",
         });
       }
@@ -289,6 +376,7 @@ export function AddMember({ role }: { role: string }) {
       label: "Birthday",
       type: "date",
       gridCols: 4,
+      required: true,
       placeholder: "YYYY-MM-DD",
     },
     {
@@ -296,6 +384,7 @@ export function AddMember({ role }: { role: string }) {
       label: "Phone Number",
       type: "tel",
       gridCols: 4,
+      required: true,
       placeholder: "+1 (555) 123-4567",
     },
     {
@@ -303,7 +392,8 @@ export function AddMember({ role }: { role: string }) {
       label: "Address",
       type: "text",
       gridCols: 4,
-      placeholder: "123 Main St, City",
+      required: true,
+      placeholder: "123 Main St, City, State, ZIP",
     },
   ];
 
@@ -312,20 +402,20 @@ export function AddMember({ role }: { role: string }) {
       <DialogTrigger asChild>
         <Button
           variant="outline"
-          className=" hover:text-white shadow-md flex items-center gap-2"
+          className=" hover:text-white shadow-md flex items-center gap-2 text-accent"
         >
           <IoPersonAddOutline />
           Add {role === "member" ? "Member" : "Trainer"}
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[650px] max-h-[80vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[750px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-xl font-bold flex items-center gap-2">
-            <CgUserAdd />
+            <CgUserAdd className="text-accent" />
             New {role === "member" ? "Member" : "Trainer"} Registration
           </DialogTitle>
           <DialogDescription>
-            Enter the new member details to create an account
+            Enter the new {role} details to create an account
           </DialogDescription>
         </DialogHeader>
 
@@ -422,7 +512,7 @@ export function AddMember({ role }: { role: string }) {
                       value={formData[field.name]}
                       onChange={handleChange}
                       placeholder={field.placeholder}
-                      className={`${errors[field.name] ? "border-red-500 focus:ring-red-500" : ""}`}
+                      className={`${errors[field.name] ? "border-red-500 focus:ring-red-500" : ""} focus:!outline-none focus:!ring-0`}
                     />
                     {errors[field.name] && (
                       <p className="text-red-500 text-xs mt-1">
@@ -455,7 +545,7 @@ export function AddMember({ role }: { role: string }) {
                       value={formData[field.name]}
                       onChange={handleChange}
                       placeholder={field.placeholder}
-                      className={`${errors[field.name] ? "border-red-500 focus:ring-red-500" : ""} pr-10`}
+                      className={`${errors[field.name] ? "border-red-500 focus:ring-red-500" : ""} pr-10  focus:!outline-none focus:!ring-0`}
                     />
 
                     {field.type === "password" && (
@@ -479,7 +569,9 @@ export function AddMember({ role }: { role: string }) {
 
               {/* Gender Selection */}
               <div className="space-y-2">
-                <Label className="text-sm font-medium">Gender</Label>
+                <Label className="text-sm font-medium">
+                  Gender <span className="text-red-500 ml-1">*</span>
+                </Label>
                 <RadioGroup
                   value={formData.gender}
                   onValueChange={(value) =>
@@ -533,7 +625,7 @@ export function AddMember({ role }: { role: string }) {
                     value={formData[field.name]}
                     onChange={handleChange}
                     placeholder={field.placeholder}
-                    className={`${errors[field.name] ? "border-red-500 focus:ring-red-500" : ""}`}
+                    className={`${errors[field.name] ? "border-red-500 focus:ring-red-500" : ""} focus:!outline-none focus:!ring-0`}
                   />
                   {errors[field.name] && (
                     <p className="text-red-500 text-xs mt-1">
@@ -543,12 +635,164 @@ export function AddMember({ role }: { role: string }) {
                 </div>
               ))}
             </div>
+            {role === "member" && (
+              <div>
+                {/* Emergency Contact Section */}
+                <div className="space-y-4">
+                  <h3 className="font-medium text-sm text-gray-500 uppercase tracking-wide border-b pb-2">
+                    Emergency Contact
+                  </h3>
 
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="space-y-2">
+                      <Label
+                        htmlFor="emergencyContactName"
+                        className="text-sm font-medium"
+                      >
+                        Contact Name
+                      </Label>
+                      <Input
+                        id="emergencyContactName"
+                        name="emergencyContactName"
+                        type="text"
+                        value={formData.emergencyContactName}
+                        onChange={handleChange}
+                        placeholder="Jane Doe"
+                        className="focus:!outline-none focus:!ring-0"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label
+                        htmlFor="emergencyContactPhone"
+                        className="text-sm font-medium"
+                      >
+                        Contact Phone
+                      </Label>
+                      <Input
+                        id="emergencyContactPhone"
+                        name="emergencyContactPhone"
+                        type="tel"
+                        value={formData.emergencyContactPhone}
+                        onChange={handleChange}
+                        placeholder="+1 (555) 987-6543"
+                        className={`${errors.emergencyContactPhone ? "border-red-500 focus:ring-red-500" : ""} focus:!outline-none focus:!ring-0`}
+                      />
+                      {errors.emergencyContactPhone && (
+                        <p className="text-red-500 text-xs mt-1">
+                          {errors.emergencyContactPhone}
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label
+                        htmlFor="emergencyContactRelation"
+                        className="text-sm font-medium"
+                      >
+                        Relationship
+                      </Label>
+                      <Select
+                        onValueChange={(value) =>
+                          handleSelect("emergencyContactRelation", value)
+                        }
+                        value={formData.emergencyContactRelation}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select relationship" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="spouse">Spouse</SelectItem>
+                          <SelectItem value="parent">Parent</SelectItem>
+                          <SelectItem value="sibling">Sibling</SelectItem>
+                          <SelectItem value="child">Child</SelectItem>
+                          <SelectItem value="friend">Friend</SelectItem>
+                          <SelectItem value="other">Other</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Fitness Information Section */}
+                <div className="space-y-4">
+                  <h3 className="font-medium text-sm text-gray-500 uppercase tracking-wide border-b pb-2">
+                    Fitness Information
+                  </h3>
+
+                  {/* Goals Section */}
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium">Fitness Goals</Label>
+                    <div className="flex gap-2">
+                      <Input
+                        value={goalInput}
+                        onChange={(e) => setGoalInput(e.target.value)}
+                        placeholder="Add a fitness goal"
+                        className="flex-1 focus:!outline-none focus:!ring-0"
+                        onKeyPress={(e) => {
+                          if (e.key === "Enter") {
+                            e.preventDefault();
+                            addGoal();
+                          }
+                        }}
+                      />
+                      <Button
+                        type="button"
+                        onClick={addGoal}
+                        variant="outline"
+                        size="sm"
+                      >
+                        Add
+                      </Button>
+                    </div>
+                    {formData.goals.length > 0 && (
+                      <div className="flex flex-wrap gap-2 mt-2">
+                        {formData.goals.map((goal, index) => (
+                          <div
+                            key={index}
+                            className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm flex items-center gap-2"
+                          >
+                            {goal}
+                            <button
+                              type="button"
+                              onClick={() => removeGoal(goal)}
+                              className="text-blue-600 hover:text-blue-800"
+                            >
+                              ×
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Medical Restrictions */}
+                  <div className="space-y-2">
+                    <Label
+                      htmlFor="medicalRestrictions"
+                      className="text-sm font-medium"
+                    >
+                      Medical Restrictions
+                    </Label>
+                    <Textarea
+                      id="medicalRestrictions"
+                      name="medicalRestrictions"
+                      value={formData.medicalRestrictions}
+                      onChange={handleChange}
+                      placeholder="Any medical conditions, allergies, or physical limitations..."
+                      className="min-h-[80px] focus:!outline-none focus:!ring-0"
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+            {/* Assignment Section */}
             <div className="space-y-4">
               {trainers.length > 0 && role === "member" && (
                 <div className="space-y-2">
                   <Label className="text-sm font-medium">
-                    Trainer <span className="text-red-500 ml-1">*</span>
+                    Assigned Trainer{" "}
+                    <span className="text-red-500 ml-1">*</span>
                   </Label>
 
                   <Select
@@ -569,7 +813,7 @@ export function AddMember({ role }: { role: string }) {
 
                     <SelectContent>
                       {trainers.map((trainer, index) => (
-                        <SelectItem key={index} value={trainer.email}>
+                        <SelectItem key={index} value={trainer._id}>
                           {trainer.firstName} {trainer.lastName} (
                           {trainer.email})
                         </SelectItem>
@@ -582,32 +826,8 @@ export function AddMember({ role }: { role: string }) {
                       {errors.trainerAssigned}
                     </p>
                   )}
-
-                  {/* {errors.membershipType && (
-                      <p className="text-red-500 text-xs mt-1">
-                        {errors.membershipType}
-                      </p>
-                    )} */}
                 </div>
               )}
-
-              <div className="grid grid-cols-2 gap-4">
-                {formFields.slice(7, 9).map((field) => (
-                  <div className="space-y-2" key={field.name}>
-                    <Label htmlFor={field.name} className="text-sm font-medium">
-                      {field.label}
-                    </Label>
-                    <Input
-                      id={field.name}
-                      name={field.name}
-                      type={field.type}
-                      value={formData[field.name]}
-                      onChange={handleChange}
-                      placeholder={field.placeholder}
-                    />
-                  </div>
-                ))}
-              </div>
 
               {/* Profile Image Upload */}
               <div className="space-y-2">
@@ -622,7 +842,7 @@ export function AddMember({ role }: { role: string }) {
                     ref={fileInputRef}
                     accept="image/*"
                     onChange={handleFileChange}
-                    className="hidden"
+                    className="hidden focus:!outline-none focus:!ring-0"
                   />
                   <Button
                     type="button"
@@ -672,7 +892,7 @@ export function AddMember({ role }: { role: string }) {
           <Button
             onClick={handleSubmit}
             disabled={isSubmitting}
-            className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-2"
+            className="bg-accent/90 hover:bg-accent text-white flex items-center gap-2"
           >
             {isSubmitting ? (
               <>
@@ -716,7 +936,7 @@ export function AddMember({ role }: { role: string }) {
                   <polyline points="17 21 17 13 7 13 7 21" />
                   <polyline points="7 3 7 8 15 8" />
                 </svg>
-                Save {role==="member"?"Member":"Trainer"}
+                Save {role === "member" ? "Member" : "Trainer"}
               </>
             )}
           </Button>

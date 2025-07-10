@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { RiLockPasswordLine } from "react-icons/ri";
 import { MdOutlineEmail } from "react-icons/md";
 import { FiEye, FiEyeOff } from "react-icons/fi";
+import Link from "next/link";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -32,7 +33,6 @@ export default function LoginPage() {
             email: emailRef.current.value,
             password: passwordRef.current.value,
           }),
-          
         }
       );
 
@@ -75,7 +75,7 @@ export default function LoginPage() {
         <div className="w-1/2 bg-gradient-to-br from-[#ff1313] to-[#ff857a] relative overflow-hidden">
           <div className="absolute -bottom-10 -right-20 w-full">
             <img
-              src="/api/placeholder/400/400"
+              src="https://www.activites-plein-air.fr/wp-content/uploads/2019/07/fitness-caracteristiques.jpg"
               alt="Fitness"
               className="w-full object-cover transform -rotate-12 hover:rotate-0 transition-transform duration-300"
             />
@@ -150,9 +150,12 @@ export default function LoginPage() {
                   Remember me
                 </label>
               </div>
-              <a href="#" className="text-sm text-accent hover:text-accent/80">
+              <Link
+                href="/forgotPassword"
+                className="text-sm text-accent hover:text-accent/80"
+              >
                 Forgot password?
-              </a>
+              </Link>
             </div>
 
             {/* Error Message */}

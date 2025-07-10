@@ -87,14 +87,11 @@ export const getExerciseById = async (req, res) => {
 export const updateExercise = async (req, res) => {
   try {
     const { name, category, equipment, description, photourl } = req.body;
+
     const updatedExercise = await Exercise.findByIdAndUpdate(
       req.params.id,
-      name,
-      category,
-      equipment,
-      description,
-      photourl,
-      { new: true }
+      { name, category, equipment, description, photourl },
+      { new: true, runValidators: true }
     );
 
     if (!updatedExercise) {
@@ -108,7 +105,7 @@ export const updateExercise = async (req, res) => {
       exercise: updatedExercise,
     });
   } catch (error) {
-    console.log(error);
+    console.error("❌ Error in updateExercise controller:", error);
     res.status(500).json({
       message: "Error in updateExercise controller",
     });
