@@ -92,7 +92,19 @@ export default function Home() {
     fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/me`, {
       credentials: "include",
     })
-      .then((res) => res.json())
+      .then((res) => {
+        if (res.status === 401) {
+          // Pas connecté, réponse attendue
+          return null;
+        }
+
+        if (!res.ok) {
+          // Autre erreur HTTP
+          throw new Error(`Erreur serveur : ${res.status}`);
+        }
+
+        return res.json();
+      })
       .then((data) => {
         if (isMounted && data && data._id) {
           setIsLoggedIn(true);

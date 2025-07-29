@@ -26,12 +26,17 @@ const app = express();
 // connect to db
 connectDB();
 
-// middlewares
-// middlewares
+const allowedOrigins = [process.env.CLIENT_URL];
 app.use(
   cors({
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
     credentials: true,
-    origin: "http://localhost:3000",
   })
 );
 app.use(helmet());
@@ -46,7 +51,13 @@ const server = http.createServer(app);
 // Initialisation de Socket.IO
 const io = new Server(server, {
   cors: {
-    origin: "http://localhost:3000",
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Socket.IO CORS not allowed"));
+      }
+    },
     credentials: true,
   },
 });

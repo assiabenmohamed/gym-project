@@ -102,6 +102,17 @@ function Navbar() {
             </Link>
           </li>
         ))}
+        <li>
+          <Link
+            href="login"
+            className={`${
+              pathname === "/login" && "border-b border-accent text-accent"
+            } capitalize font-medium hover:text-accent transition-all`}
+            onClick={() => setIsOpen(false)} // Ferme le menu après clic
+          >
+            LOGIN
+          </Link>
+        </li>
       </ul>
     </div>
   );
