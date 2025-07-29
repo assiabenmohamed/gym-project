@@ -135,10 +135,6 @@ export async function getAllMembers(req, res) {
   try {
     const members = await User.find({ role: "member" }).select("-password");
 
-    if (!members || members.length === 0) {
-      return res.status(404).json({ message: "No members found" });
-    }
-
     res.status(200).json(members);
   } catch (error) {
     console.error("getAllMembers error:", error);
@@ -160,10 +156,6 @@ export async function getAllUsers(req, res) {
 export async function getAllTrainers(req, res) {
   try {
     const trainers = await User.find({ role: "trainer" }).select("-password");
-
-    if (!trainers || trainers.length === 0) {
-      return res.status(404).json({ message: "No trainers found" });
-    }
 
     res.status(200).json(trainers);
   } catch (error) {
