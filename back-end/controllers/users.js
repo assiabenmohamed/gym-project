@@ -104,6 +104,7 @@ export async function login(req, res) {
       maxAge: MILILSECONDS_IN_A_DAY * 14, // 14 jours
       httpOnly: true, // Le cookie est accessible seulement par le serveur
       secure: process.env.NODE_ENV === "production", // En production, cookie sécurisé (requiert HTTPS)
+      sameSite: "None",
     };
     userExists.isOnline = true;
     res.cookie("token", token, options);
@@ -272,8 +273,7 @@ export async function logout(req, res) {
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const userId = decoded.id;
-
+    const userId = decoded.userId;
     await User.findByIdAndUpdate(userId, { isOnline: false });
 
     res.clearCookie("token", {
