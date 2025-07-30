@@ -3,7 +3,7 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   /* config options here */
   images: {
-    domains: ["localhost"],
+    domains: ["gym-project-3m9w.onrender.com"],
   },
 };
 
