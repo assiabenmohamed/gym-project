@@ -1,65 +1,65 @@
-// import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
-// const protectedRoutes: { [key: string]: string[] } = {
-//   admin: [
-//     "/admin",
-//     "/dashboard",
-//     "/members",
-//     "/subscription-plans",
-//     "/payments",
-//     "/trainers",
-//   ],
-//   trainer: ["/dashboard", "/programs", "/exercises", "/body-tracking-coach"],
-//   member: ["/dashboard", "/sessions", "/exercises-list", "/body-tracking"],
-// };
+const protectedRoutes: { [key: string]: string[] } = {
+  admin: [
+    "/admin",
+    "/dashboard",
+    "/members",
+    "/subscription-plans",
+    "/payments",
+    "/trainers",
+  ],
+  trainer: ["/dashboard", "/programs", "/exercises", "/body-tracking-coach"],
+  member: ["/dashboard", "/sessions", "/exercises-list", "/body-tracking"],
+};
 
-// export async function middleware(request: NextRequest) {
-//   const token = request.cookies.get("token")?.value;
-//   console.log("token", token);
+export async function middleware(request: NextRequest) {
+  const token = request.cookies.get("token")?.value;
+  console.log("token", token);
 
-//   if (!token) {
-//     return NextResponse.redirect(new URL("/", request.url)); // Not logged in
-//   }
+  if (!token) {
+    return NextResponse.redirect(new URL("/", request.url)); // Not logged in
+  }
 
-//   try {
-//     const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/me`, {
-//       headers: {
-//         Cookie: `token=${token}`,
-//       },
-//     });
+  try {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/me`, {
+      headers: {
+        Cookie: `token=${token}`,
+      },
+    });
 
-//     if (!res.ok) throw new Error("Invalid token");
+    if (!res.ok) throw new Error("Invalid token");
 
-//     const user = await res.json();
-//     const role = user.role;
-//     const pathname = request.nextUrl.pathname;
+    const user = await res.json();
+    const role = user.role;
+    const pathname = request.nextUrl.pathname;
 
-//     const isAllowed = protectedRoutes[role]?.some((route) =>
-//       pathname.startsWith(route)
-//     );
+    const isAllowed = protectedRoutes[role]?.some((route) =>
+      pathname.startsWith(route)
+    );
 
-//     if (!isAllowed) {
-//       return NextResponse.redirect(new URL("/not-found", request.url)); // Or /unauthorized
-//     }
+    if (!isAllowed) {
+      return NextResponse.redirect(new URL("/not-found", request.url)); // Or /unauthorized
+    }
 
-//     return NextResponse.next();
-//   } catch (err) {
-//     return NextResponse.redirect(new URL("/", request.url));
-//   }
-// }
-// export const config = {
-//   matcher: [
-//     "/dashboard",
-//     "/admin",
-//     "/members",
-//     "/subscription-plans",
-//     "/payments",
-//     "/trainers",
-//     "/programs",
-//     "/exercises",
-//     "/body-tracking-coach",
-//     "/sessions",
-//     "/exercises-list",
-//     "/body-tracking",
-//   ],
-// };
+    return NextResponse.next();
+  } catch (err) {
+    // return NextResponse.redirect(new URL("/", request.url));
+  }
+}
+export const config = {
+  matcher: [
+    "/dashboard",
+    "/admin",
+    "/members",
+    "/subscription-plans",
+    "/payments",
+    "/trainers",
+    "/programs",
+    "/exercises",
+    "/body-tracking-coach",
+    "/sessions",
+    "/exercises-list",
+    "/body-tracking",
+  ],
+};
