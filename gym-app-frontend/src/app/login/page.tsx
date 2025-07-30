@@ -5,7 +5,6 @@ import { RiLockPasswordLine } from "react-icons/ri";
 import { MdOutlineEmail } from "react-icons/md";
 import { FiEye, FiEyeOff } from "react-icons/fi";
 import Link from "next/link";
-import axios from "axios";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -22,35 +21,40 @@ export default function LoginPage() {
         return;
       }
 
-      const res = await axios.post(
+      const res = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/users/login`,
         {
-          email: emailRef.current.value,
-          password: passwordRef.current.value,
-        },
-        {
-          withCredentials: true, // 🔥 important pour les cookies
+          method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
+          credentials: "include",
+          body: JSON.stringify({
+            email: emailRef.current.value,
+            password: passwordRef.current.value,
+          }),
         }
       );
 
-      const data = res.data;
-      console.log("Login successful", data);
-
-      setUser(data);
-      router.push("/");
-    } catch (error: any) {
-      console.error("Error during login:", error);
-
-      if (error.response?.status === 401) {
-        setError("Invalid email or password");
+      if (res.ok) {
+        const data = await res.json();
+        console.log("Login successful", data);
+        setUser(data);
+        router.push("/");
       } else {
-        setError("Connection error. Please try again later.");
+        setError("Invalid email or password");
       }
+    } catch (error) {
+      console.error("Error during login:", error);
+      setError("Connection error. Please try again later.");
     }
   }
+
+  const [credentials, setCredentials] = useState({
+    email: "",
+    password: "",
+  });
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setCredentials((prev) => ({
