@@ -5,6 +5,7 @@ import { RiLockPasswordLine } from "react-icons/ri";
 import { MdOutlineEmail } from "react-icons/md";
 import { FiEye, FiEyeOff } from "react-icons/fi";
 import Link from "next/link";
+import axios from "axios";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -21,34 +22,37 @@ export default function LoginPage() {
         return;
       }
 
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/users/login`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include",
-          body: JSON.stringify({
-            email: emailRef.current.value,
-            password: passwordRef.current.value,
-          }),
-        }
-      );
-
-      if (res.ok) {
-        const data = await res.json();
-        console.log("Login successful", data);
-        setUser(data);
-        router.push("/");
-      } else {
-        setError("Invalid email or password");
-      }
-    } catch (error) {
-      console.error("Error during login:", error);
-      setError("Connection error. Please try again later.");
+     const res = await axios.post(
+    `${process.env.NEXT_PUBLIC_API_URL}/users/login`,
+    {
+      email: emailRef.current.value,
+      password: passwordRef.current.value,
+    },
+    {
+      withCredentials: true, // 🔥 important pour recevoir les cookies
+      headers: {
+        "Content-Type": "application/json",
+      },
     }
+  );
+
+  // Axios ne jette pas d'erreur si le code est 2xx, donc ici succès
+  const data = res.data;
+  console.log("Login successful", data);
+
+  setUser(data);
+  router.push("/");
+
+} catch (error: any) {
+  // Axios jette une erreur si le code HTTP est 4xx ou 5xx
+  console.error("Error during login:", error);
+
+  if (error.response?.status === 401) {
+    setError("Invalid email or password");
+  } else {
+    setError("Connection error. Please try again later.");
   }
+}
 
   const [credentials, setCredentials] = useState({
     email: "",
