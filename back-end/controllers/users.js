@@ -105,6 +105,7 @@ export async function login(req, res) {
       httpOnly: true, // DOIT être true pour que middleware le lise
       secure: true,
       sameSite: "None",
+      path: "/",
     };
     userExists.isOnline = true;
     res.cookie("token", token, options);
