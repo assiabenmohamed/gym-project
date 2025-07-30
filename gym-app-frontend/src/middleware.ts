@@ -18,7 +18,7 @@ export async function middleware(request: NextRequest) {
 console.log("token",token);
   // 🔒 Rediriger si non connecté
   if (!token) {
-    return NextResponse.redirect(new URL("/", request.url));
+    // return NextResponse.redirect(new URL("/", request.url));
   }
 
   try {
