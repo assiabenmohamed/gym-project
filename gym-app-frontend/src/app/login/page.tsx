@@ -22,43 +22,35 @@ export default function LoginPage() {
         return;
       }
 
-     const res = await axios.post(
-    `${process.env.NEXT_PUBLIC_API_URL}/users/login`,
-    {
-      email: emailRef.current.value,
-      password: passwordRef.current.value,
-    },
-    {
-      withCredentials: true, // 🔥 important pour recevoir les cookies
-      headers: {
-        "Content-Type": "application/json",
-      },
+      const res = await axios.post(
+        `${process.env.NEXT_PUBLIC_API_URL}/users/login`,
+        {
+          email: emailRef.current.value,
+          password: passwordRef.current.value,
+        },
+        {
+          withCredentials: true, // 🔥 important pour les cookies
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      const data = res.data;
+      console.log("Login successful", data);
+
+      setUser(data);
+      router.push("/");
+    } catch (error: any) {
+      console.error("Error during login:", error);
+
+      if (error.response?.status === 401) {
+        setError("Invalid email or password");
+      } else {
+        setError("Connection error. Please try again later.");
+      }
     }
-  );
-
-  // Axios ne jette pas d'erreur si le code est 2xx, donc ici succès
-  const data = res.data;
-  console.log("Login successful", data);
-
-  setUser(data);
-  router.push("/");
-
-} catch (error: any) {
-  // Axios jette une erreur si le code HTTP est 4xx ou 5xx
-  console.error("Error during login:", error);
-
-  if (error.response?.status === 401) {
-    setError("Invalid email or password");
-  } else {
-    setError("Connection error. Please try again later.");
   }
-}
-
-  const [credentials, setCredentials] = useState({
-    email: "",
-    password: "",
-  });
-
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setCredentials((prev) => ({
