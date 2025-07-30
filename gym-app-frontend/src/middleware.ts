@@ -15,15 +15,18 @@ const protectedRoutes: { [key: string]: string[] } = {
 
 export async function middleware(request: NextRequest) {
   const token = request.cookies.get("token")?.value;
-
+  console.log("token ", token);
+  // ✅ Redirection si pas connecté
   if (!token) {
-    return NextResponse.redirect(new URL("/", request.url)); // Not logged in
+    return NextResponse.redirect(new URL("/", request.url));
   }
 
   try {
+    // ✅ Appel vers le backend avec le token dans l'en-tête Cookie
     const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/me`, {
+      method: "GET",
       headers: {
-        Cookie: `token=${token}`,
+        Cookie: `token=${token}`, // important pour authentifier côté serveur
       },
     });
 
@@ -33,12 +36,13 @@ export async function middleware(request: NextRequest) {
     const role = user.role;
     const pathname = request.nextUrl.pathname;
 
+    // ✅ Vérifie si l'utilisateur a accès à la route
     const isAllowed = protectedRoutes[role]?.some((route) =>
       pathname.startsWith(route)
     );
 
     if (!isAllowed) {
-      return NextResponse.redirect(new URL("/not-found", request.url)); // Or /unauthorized
+      return NextResponse.redirect(new URL("/not-found", request.url));
     }
 
     return NextResponse.next();
@@ -46,6 +50,7 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL("/", request.url));
   }
 }
+
 export const config = {
   matcher: [
     "/dashboard",

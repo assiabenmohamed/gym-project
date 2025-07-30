@@ -102,7 +102,7 @@ export async function login(req, res) {
 
     const options = {
       maxAge: MILILSECONDS_IN_A_DAY * 14, // 14 jours
-      httpOnly: false, // Le cookie est accessible seulement par le serveur
+      httpOnly: true, // DOIT être true pour que middleware le lise
       secure: true,
       sameSite: "None",
     };
