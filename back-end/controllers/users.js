@@ -99,13 +99,12 @@ export async function login(req, res) {
     // Génération du JWT
     const payload = { userId: userExists._id, email: userExists.email };
     const token = jwt.sign(payload, JWT_SECRET, { expiresIn: "14d" }); // Le token expire après 14 jours
-    const isProduction = process.env.NODE_ENV === "production";
+
     const options = {
       maxAge: MILILSECONDS_IN_A_DAY * 14, // 14 jours
-      httpOnly: false, // Accessible côté client
-      secure: isProduction, // HTTPS en production seulement
-      sameSite: "lax", // Important pour Vercel
-      path: "/", // Accessible sur toutes les routes
+      httpOnly: false, // Le cookie est accessible seulement par le serveur
+      secure: true,
+      sameSite: "None",
     };
     userExists.isOnline = true;
     res.cookie("token", token, options);
