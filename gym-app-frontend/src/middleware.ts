@@ -18,7 +18,7 @@ export async function middleware(request: NextRequest) {
   console.log("token", token);
 
   if (!token) {
-    return NextResponse.redirect(new URL("/", request.url)); // Not logged in
+    // return NextResponse.redirect(new URL("/", request.url)); // Not logged in
   }
 
   try {
@@ -44,7 +44,7 @@ export async function middleware(request: NextRequest) {
 
     return NextResponse.next();
   } catch (err) {
-    // return NextResponse.redirect(new URL("/", request.url));
+    return NextResponse.redirect(new URL("/", request.url));
   }
 }
 export const config = {
