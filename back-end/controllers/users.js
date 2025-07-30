@@ -104,7 +104,7 @@ export async function login(req, res) {
       maxAge: MILILSECONDS_IN_A_DAY * 14, // 14 jours
       httpOnly: true, // Le cookie est accessible seulement par le serveur
       secure: process.env.NODE_ENV === "production", // En production, cookie sécurisé (requiert HTTPS)
-      sameSite: "None",
+  sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax", // "Lax" en local
     };
     userExists.isOnline = true;
     res.cookie("token", token, options);
