@@ -103,7 +103,7 @@ export async function login(req, res) {
       path: "/",
     };
 
-    console.log("Setting cookie with options:", cookieOptions);
+    console.log("Setting cookie with options:", options);
     console.log("Token generated length:", token.length);
 
     // Définir le cookie JWT

@@ -26,22 +26,49 @@ const app = express();
 // connect to db
 connectDB();
 
-const allowedOrigins = [process.env.CLIENT_URL];
+const allowedOrigins = [
+  "http://localhost:3000", // Development
+  "https://gym-project-8u8p.vercel.app", // Votre URL Vercel
+  process.env.CLIENT_URL, // Variable d'environnement
+];
 
-app.use(
-  cors({
-    origin: function (origin, callback) {
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error("Not allowed by CORS"));
-      }
-    },
-    credentials: true, // INDISPENSABLE
-    methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-  })
-);
+// Log des origins autorisées au démarrage
+console.log("Allowed origins:", allowedOrigins);
+
+const corsOptions = {
+  origin: function (origin, callback) {
+    console.log("CORS check for origin:", origin);
+
+    // Permettre les requêtes sans origin (mobile apps, Postman, etc.)
+    if (!origin) {
+      console.log("No origin - allowing");
+      return callback(null, true);
+    }
+
+    // Vérifier si l'origin est autorisée
+    if (allowedOrigins.includes(origin)) {
+      console.log("Origin allowed:", origin);
+      callback(null, true);
+    } else {
+      console.error(`CORS blocked origin: ${origin}`);
+      console.log("Allowed origins:", allowedOrigins);
+      callback(new Error(`Not allowed by CORS - Origin: ${origin}`));
+    }
+  },
+  credentials: true, // INDISPENSABLE pour les cookies
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+  allowedHeaders: [
+    "Content-Type",
+    "Authorization",
+    "Cookie",
+    "Set-Cookie",
+    "X-Requested-With",
+  ],
+  exposedHeaders: ["Set-Cookie"],
+  optionsSuccessStatus: 200,
+};
+
+app.use(cors(corsOptions));
 app.use(helmet());
 app.use(express.json());
 app.use(express.static("public"));
