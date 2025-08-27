@@ -96,10 +96,10 @@ export async function login(req, res) {
 
     // Options du cookie
     const options = {
-      maxAge: 14 * 24 * 60 * 60 * 1000, // 14 jours
+      maxAge: MILLISECONDS_IN_A_DAY * 14,
       httpOnly: true,
-      secure: true, // Toujours true en production
-      sameSite: "none", // Cross-origin
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
       path: "/",
     };
 
@@ -108,6 +108,7 @@ export async function login(req, res) {
 
     // Définir le cookie JWT
     res.cookie("token", token, options);
+    console.log("✅ Cookie 'token' défini");
 
     return res.status(200).json({ user: userExists });
   } catch (error) {
