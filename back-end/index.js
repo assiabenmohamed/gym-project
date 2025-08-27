@@ -27,10 +27,19 @@ const app = express();
 connectDB();
 
 const allowedOrigins = [process.env.CLIENT_URL];
+
 app.use(
   cors({
-    origin: ["https://gym-project-8u8p.vercel.app"],
-    credentials: true,
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    credentials: true, // INDISPENSABLE
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 app.use(helmet());

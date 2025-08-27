@@ -76,44 +76,40 @@ export async function login(req, res) {
     const { email, password } = req.body;
 
     const userExists = await User.findOne({ email });
-    console.log(userExists);
     if (!userExists) {
-      await new Promise((resolve) => setTimeout(resolve, 50));
-      return res.status(400).json({
-        message: "Password or email doesn't exists",
-      });
-    } // 200ms
+      return res.status(400).json({ message: "Invalid email or password" });
+    }
 
-    // test password
+    // Vérification du mot de passe
     const passwordMatch = await bcrypt.compare(password, userExists.password);
-
     if (!passwordMatch) {
-      return res.status(400).json({
-        message: "Password or email doesn't exists",
-      });
-    } //
-    // ✅ Mettre à jour l'état connecté
+      return res.status(400).json({ message: "Invalid email or password" });
+    }
+
+    // Marquer l'utilisateur comme connecté
     userExists.isOnline = true;
     await userExists.save();
-    // Génération du JWT
-    const payload = { userId: userExists._id, email: userExists.email };
-    const token = jwt.sign(payload, JWT_SECRET, { expiresIn: "14d" }); // Le token expire après 14 jours
 
+    // Générer le JWT
+    const payload = { userId: userExists._id, email: userExists.email };
+    const token = jwt.sign(payload, JWT_SECRET, { expiresIn: "14d" });
+
+    // Options du cookie
     const options = {
-      maxAge: MILILSECONDS_IN_A_DAY * 14, // 14 jours
-      httpOnly: true, // DOIT être true pour que middleware le lise
-      secure: true,
+      maxAge: MILILSECONDS_IN_A_DAY * 14,
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production", // Sécurisé uniquement en prod
       sameSite: "None",
       path: "/",
     };
-    userExists.isOnline = true;
+
+    // Définir le cookie JWT
     res.cookie("token", token, options);
-    res.json({
-      user: userExists,
-    });
+
+    return res.status(200).json({ user: userExists });
   } catch (error) {
-    console.log(error);
-    res.status(500).json({ message: "error in login controller" });
+    console.error(error);
+    return res.status(500).json({ message: "Error in login controller" });
   }
 }
 
