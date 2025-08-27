@@ -17,15 +17,15 @@ export async function register(req, res) {
       gender,
       phoneNumber,
       role,
-
       trainerAssigned,
-
       emergencyContact,
       goals,
       medicalRestrictions,
     } = req.body;
     // Vérifie si l'utilisateur existe déjà
-
+    if (!trainerAssigned || trainerAssigned === "") {
+      trainerAssigned = null;
+    }
     const userExists = await User.findOne({ email });
 
     if (userExists) {
