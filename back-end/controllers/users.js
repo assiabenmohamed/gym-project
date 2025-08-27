@@ -3,7 +3,6 @@ import jwt from "jsonwebtoken";
 import { User } from "../models/users.js";
 import crypto from "crypto";
 
-const MILILSECONDS_IN_A_DAY = 1000 * 60 * 60 * 24;
 const JWT_SECRET = process.env.JWT_SECRET || "supersecretkey"; // 🔐 À mettre dans .env
 export async function register(req, res) {
   try {
@@ -92,15 +91,20 @@ export async function login(req, res) {
 
     // Générer le JWT
     const payload = { userId: userExists._id, email: userExists.email };
+    const MILILSECONDS_IN_A_DAY = 1000 * 60 * 60 * 24;
     const token = jwt.sign(payload, JWT_SECRET, { expiresIn: "14d" });
 
     // Options du cookie
     const options = {
-      maxAge: MILILSECONDS_IN_A_DAY * 14,
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production", // Sécurisé uniquement en prod
-      sameSite: "None",
-      path: "/",
+      maxAge: MILLISECONDS_IN_A_DAY * 14, // 14 jours en millisecondes
+      httpOnly: true, // Empêche l'accès via JavaScript côté client
+      secure: process.env.NODE_ENV === "production", // HTTPS uniquement en production
+      sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
+      path: "/", // Cookie disponible sur tout le site
+      domain:
+        process.env.NODE_ENV === "production"
+          ? process.env.COOKIE_DOMAIN
+          : undefined,
     };
 
     // Définir le cookie JWT
