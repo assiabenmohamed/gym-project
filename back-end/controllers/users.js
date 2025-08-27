@@ -22,20 +22,19 @@ export async function register(req, res) {
       goals,
       medicalRestrictions,
     } = req.body;
-    // Vérifie si l'utilisateur existe déjà
-    if (!trainerAssigned || trainerAssigned === "") {
-      trainerAssigned = null;
-    }
-    const userExists = await User.findOne({ email });
 
+    // ✅ Corriger ici
+    const finalTrainerAssigned =
+      trainerAssigned && trainerAssigned !== "" ? trainerAssigned : null;
+
+    const userExists = await User.findOne({ email });
     if (userExists) {
       return res.status(400).json({ message: "User already exists" });
     }
-    // Hash du mot de passe (asynchrone)
 
     const salt = await bcrypt.genSalt(10);
     const hash = await bcrypt.hash(password, salt);
-    // Récupère le chemin de l'image si elle a été envoyée
+
     const profileImageUrl = req.file
       ? `uploads/${req.file.filename}`
       : "uploads/default-avatar.jpg";
@@ -50,25 +49,25 @@ export async function register(req, res) {
       gender,
       phoneNumber,
       role,
-      trainerAssigned,
-
+      trainerAssigned: finalTrainerAssigned,
       emergencyContact,
       goals,
       medicalRestrictions,
       profileImageUrl,
     });
-    await newUser.save(); // ✅ Attente correcte
 
-    // Supprime le password du nouvel utilisateur avant de répondre
+    await newUser.save();
+
     const userResponse = { ...newUser._doc };
     delete userResponse.password;
 
     res.status(201).json({ user: userResponse });
   } catch (error) {
     console.log(error);
-    res
-      .status(500)
-      .json({ message: "error in register controller", error: error.message });
+    res.status(500).json({
+      message: "error in register controller",
+      error: error.message,
+    });
   }
 }
 
