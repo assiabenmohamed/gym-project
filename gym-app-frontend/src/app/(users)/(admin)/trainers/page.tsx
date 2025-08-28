@@ -268,7 +268,7 @@ export default function Page() {
               />
             </div>
             <div className="flex-shrink-0">
-              <AddMember role="tarainer" onSuccess={getUsers} />
+              <AddMember role="trainer" onSuccess={getUsers} />
             </div>
           </div>
         </div>
