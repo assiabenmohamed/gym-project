@@ -96,7 +96,7 @@ export async function login(req, res) {
 
     // Options du cookie
     const options = {
-      maxAge: MILLISECONDS_IN_A_DAY * 14,
+      maxAge: MILILSECONDS_IN_A_DAY * 14,
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
