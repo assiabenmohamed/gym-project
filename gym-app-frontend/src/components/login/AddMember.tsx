@@ -48,6 +48,7 @@ export interface FormData {
   address: string;
   gender: string;
   phoneNumber: string;
+  role: string;
   trainerAssigned?: string;
   emergencyContactName: string;
   emergencyContactPhone: string;
@@ -82,6 +83,7 @@ export function AddMember({
     address: "",
     gender: "male",
     phoneNumber: "",
+    role: role,
     trainerAssigned: "",
     emergencyContactName: "",
     emergencyContactPhone: "",
@@ -304,6 +306,7 @@ export function AddMember({
           address: "",
           gender: "male",
           phoneNumber: "",
+          role: role,
           trainerAssigned: "",
           emergencyContactName: "",
           emergencyContactPhone: "",

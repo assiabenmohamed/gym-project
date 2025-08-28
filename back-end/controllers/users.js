@@ -143,6 +143,7 @@ export async function login(req, res) {
       secure: isProduction, // ✅ Secure uniquement en prod
       sameSite: isProduction ? "None" : "Lax", // ✅ Cross-domain en prod
       path: "/",
+      domain: isProduction ? ".vercel.app" : undefined,
     };
 
     res.cookie("token", token, options);

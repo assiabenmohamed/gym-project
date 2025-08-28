@@ -16,16 +16,16 @@ const protectedRoutes: { [key: string]: string[] } = {
 export async function middleware(request: NextRequest) {
   const token = request.cookies.get("token")?.value;
   const pathname = request.nextUrl.pathname;
+
   console.log("🔑 Token dans middleware:", token);
 
-  // ✅ Si aucun token → rediriger vers page login
   if (!token) {
-    console.log("🚨 Utilisateur non connecté → redirection");
+    console.log("🚨 Pas de token → redirection login");
     return NextResponse.redirect(new URL("/", request.url));
   }
 
   try {
-    // ✅ Vérifie le token auprès de l'API
+    // ✅ Vérifie le token côté backend
     const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/me`, {
       method: "GET",
       headers: {
@@ -39,7 +39,7 @@ export async function middleware(request: NextRequest) {
     const user = await res.json();
     const role = user.role;
 
-    // Vérifie les routes autorisées
+    // ✅ Vérifie si la route est autorisée
     const allowedRoutes = protectedRoutes[role] || [];
     const isAllowed = allowedRoutes.some((route) => pathname.startsWith(route));
 
