@@ -106,8 +106,8 @@ export default function ExerciseApp() {
 
     try {
       const url = editingExercise
-        ? `http://localhost:5000/exercises/${editingExercise._id}`
-        : "http://localhost:5000/exercises";
+        ? `${process.env.NEXT_PUBLIC_API_URL}/${editingExercise._id}`
+        : `${process.env.NEXT_PUBLIC_API_URL}/exercises`;
 
       const method = editingExercise ? "PUT" : "POST";
 
@@ -129,7 +129,7 @@ export default function ExerciseApp() {
       }
 
       const exerciseData = await response.json();
-      console.log("Returned updated exercise:", exerciseData);
+      console.log("Returned  exercise:", exerciseData);
 
       if (editingExercise) {
         setExercises(
@@ -168,7 +168,7 @@ export default function ExerciseApp() {
 
     try {
       const response = await fetch(
-        `http://localhost:5000/exercises/${exerciseId}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/exercises/${exerciseId}`,
         {
           method: "DELETE",
         }
