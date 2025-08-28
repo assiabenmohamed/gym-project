@@ -303,6 +303,7 @@ export async function logout(req, res) {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const userId = decoded.userId;
     await User.findByIdAndUpdate(userId, { isOnline: false });
+    const isProduction = process.env.NODE_ENV === "production";
 
     res.clearCookie("token", {
       httpOnly: true,
