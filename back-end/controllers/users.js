@@ -71,6 +71,48 @@ export async function register(req, res) {
   }
 }
 
+// export async function login(req, res) {
+//   try {
+//     const { email, password } = req.body;
+
+//     const userExists = await User.findOne({ email });
+//     if (!userExists) {
+//       return res.status(400).json({ message: "Invalid email or password" });
+//     }
+
+//     const passwordMatch = await bcrypt.compare(password, userExists.password);
+//     if (!passwordMatch) {
+//       return res.status(400).json({ message: "Invalid email or password" });
+//     }
+
+//     userExists.isOnline = true;
+//     await userExists.save();
+
+//     const payload = { userId: userExists._id, email: userExists.email };
+//     const token = jwt.sign(payload, JWT_SECRET, { expiresIn: "14d" });
+
+//     // ✅ Configuration corrigée pour Render
+//     const options = {
+//       maxAge: MILILSECONDS_IN_A_DAY * 14,
+//       httpOnly: true,
+//       secure: process.env.NODE_ENV === "production",
+//       sameSite: "Lax", // ← Changé de "None" à "Lax"
+//       path: "/",
+//     };
+
+//     console.log("Environment:", process.env.NODE_ENV);
+//     console.log("Setting cookie with options:", options);
+//     console.log("Token generated length:", token.length);
+
+//     res.cookie("token", token, options);
+//     console.log("✅ Cookie 'token' défini");
+
+//     return res.status(200).json({ user: userExists });
+//   } catch (error) {
+//     console.error("Login error:", error);
+//     return res.status(500).json({ message: "Error in login controller" });
+//   }
+// }
 export async function login(req, res) {
   try {
     const { email, password } = req.body;
@@ -89,23 +131,21 @@ export async function login(req, res) {
     await userExists.save();
 
     const payload = { userId: userExists._id, email: userExists.email };
-    const token = jwt.sign(payload, JWT_SECRET, { expiresIn: "14d" });
+    const token = jwt.sign(payload, process.env.JWT_SECRET, {
+      expiresIn: "14d",
+    });
 
-    // ✅ Configuration corrigée pour Render
+    const isProduction = process.env.NODE_ENV === "production";
+
     const options = {
       maxAge: MILILSECONDS_IN_A_DAY * 14,
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "Lax", // ← Changé de "None" à "Lax"
+      secure: isProduction, // ✅ Secure uniquement en prod
+      sameSite: isProduction ? "None" : "Lax", // ✅ Cross-domain en prod
       path: "/",
     };
 
-    console.log("Environment:", process.env.NODE_ENV);
-    console.log("Setting cookie with options:", options);
-    console.log("Token generated length:", token.length);
-
     res.cookie("token", token, options);
-    console.log("✅ Cookie 'token' défini");
 
     return res.status(200).json({ user: userExists });
   } catch (error) {
