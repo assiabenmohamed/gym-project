@@ -143,7 +143,6 @@ export async function login(req, res) {
       secure: isProduction, // ✅ Secure uniquement en prod
       sameSite: isProduction ? "None" : "Lax", // ✅ Cross-domain en prod
       path: "/",
-      domain: isProduction ? ".onrender.com" : undefined,
     };
 
     res.cookie("token", token, options);
@@ -438,3 +437,4 @@ export const validateResetToken = async (req, res) => {
 
   return res.status(200).json({ success: true, email: user.email });
 };
+
