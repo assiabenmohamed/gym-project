@@ -80,43 +80,39 @@ export async function login(req, res) {
       return res.status(400).json({ message: "Invalid email or password" });
     }
 
-    // Vérification du mot de passe
     const passwordMatch = await bcrypt.compare(password, userExists.password);
     if (!passwordMatch) {
       return res.status(400).json({ message: "Invalid email or password" });
     }
 
-    // Marquer l'utilisateur comme connecté
     userExists.isOnline = true;
     await userExists.save();
 
-    // Générer le JWT
     const payload = { userId: userExists._id, email: userExists.email };
     const token = jwt.sign(payload, JWT_SECRET, { expiresIn: "14d" });
 
-    // Options du cookie
+    // ✅ Configuration corrigée pour Render
     const options = {
       maxAge: MILILSECONDS_IN_A_DAY * 14,
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
+      sameSite: "Lax", // ← Changé de "None" à "Lax"
       path: "/",
     };
 
+    console.log("Environment:", process.env.NODE_ENV);
     console.log("Setting cookie with options:", options);
     console.log("Token generated length:", token.length);
 
-    // Définir le cookie JWT
     res.cookie("token", token, options);
     console.log("✅ Cookie 'token' défini");
 
     return res.status(200).json({ user: userExists });
   } catch (error) {
-    console.error(error);
+    console.error("Login error:", error);
     return res.status(500).json({ message: "Error in login controller" });
   }
 }
-
 export async function getUserById(req, res) {
   try {
     const user = await User.findById(req.params.id).select("-password");
