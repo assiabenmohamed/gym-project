@@ -125,8 +125,9 @@ export default function SubscriptionPlans() {
             errorData.message || "Failed to create subscription plan"
           );
         }
+        const createdPlan = await response.json(); // ← contient _id généré par Mongo
+        setPlans((prev) => [...prev, createdPlan]);
 
-        setPlans((prev) => [...prev, newPlan]);
         resetForm();
         setIsCreating(false);
       } catch (error) {
