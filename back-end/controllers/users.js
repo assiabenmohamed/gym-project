@@ -143,7 +143,7 @@ export async function login(req, res) {
       secure: isProduction, // ✅ Secure uniquement en prod
       sameSite: isProduction ? "None" : "Lax", // ✅ Cross-domain en prod
       path: "/",
-      domain: isProduction ? ".onrender.com" : undefined,
+      // ✅ Important sinon le cookie persiste
     };
 
     res.cookie("token", token, options);
